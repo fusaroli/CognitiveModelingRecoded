@@ -6,7 +6,8 @@ pacman::p_load(tidyverse,
                bayesplot,
                posterior,
                rstan,
-               bayesplot)
+               bayesplot, 
+               patchwork)
 
 ## Create the data
 data <- list(
@@ -81,16 +82,9 @@ print(diagnostics_df)
 # Alternative predictive checks as in the book
 nsamples=nrow(draws_df)
 
-priorCheck <- as_tibble(expand.grid(priorpredk1 = seq(0, data$n1, 1), priorpredk2 = seq(0, data$n2, 1), prop=0))
-
-for (i in 0:data$n1){
-  for (j in 0:data$n2){
-    match.preds <- sum(draws_df$priorpredk1==i & draws_df$priorpredk2==j)/nsamples
-    if (match.preds > 0){
-      priorCheck$prop[priorCheck$priorpredk1==i & priorCheck$priorpredk2==j] = match.preds
-    }
-  }
-}
+priorCheck <- draws_df %>%
+  group_by(priorpredk1, priorpredk2) %>%
+  summarise(prop = n()/nsamples)
 
 priorPredCheck <- ggplot(priorCheck,aes(priorpredk1,priorpredk2,size=prop)) +
   scale_size(range=c(0,5)) +
@@ -102,16 +96,9 @@ priorPredCheck <- ggplot(priorCheck,aes(priorpredk1,priorpredk2,size=prop)) +
   geom_point(aes(x=data$k1, y=data$k2), colour="red", shape=4) +
   theme_classic()
 
-postCheck <- as_tibble(expand.grid(postpredk1 = seq(0, data$n1, 1), postpredk2 = seq(0, data$n2, 1), prop=0))
-
-for (i in 0:data$n1){
-  for (j in 0:data$n2){
-    match.preds <- sum(draws_df$postpredk1==i & draws_df$postpredk2==j)/nsamples
-    if (match.preds > 0){
-      postCheck$prop[postCheck$postpredk1==i & postCheck$postpredk2==j] = match.preds
-    }
-  }
-}
+postCheck <- draws_df %>%
+  group_by(postpredk1, postpredk2) %>%
+  summarise(prop = n()/nsamples)
 
 posteriorPredCheck <- ggplot(postCheck,aes(postpredk1,postpredk2,size=prop)) +
     scale_size(range=c(0,5)) +
@@ -123,7 +110,6 @@ posteriorPredCheck <- ggplot(postCheck,aes(postpredk1,postpredk2,size=prop)) +
     geom_point(aes(x=data$k1, y=data$k2), colour="red", shape=4) +
     theme_classic()
 
-library(patchwork)
 priorPredCheck + posteriorPredCheck
 
 ## GENERATE THE CODE IN BRMS AND COMPARE
