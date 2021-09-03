@@ -78,14 +78,21 @@ diagnostics_df <- as_draws_df(samples$sampler_diagnostics())
 print(diagnostics_df)
 
 
-# Alternative predictive checks
+# Alternative predictive checks as in the book
+nsamples=nrow(draws_df)
 
-predChecks <- draws_df %>%
-  group_by(priorpredk1,priorpredk2) %>%
-  summarize(freq=n()) %>%
-  mutate(prop=freq/4000)
+priorCheck <- as_tibble(expand.grid(priorpredk1 = seq(0, data$n1, 1), priorpredk2 = seq(0, data$n2, 1), prop=0))
 
-priorCheck <- ggplot(predChecks,aes(priorpredk1,priorpredk2,size=prop)) +
+for (i in 0:data$n1){
+  for (j in 0:data$n2){
+    match.preds <- sum(draws_df$priorpredk1==i & draws_df$priorpredk2==j)/nsamples
+    if (match.preds > 0){
+      priorCheck$prop[priorCheck$priorpredk1==i & priorCheck$priorpredk2==j] = match.preds
+    }
+  }
+}
+
+priorPredCheck <- ggplot(priorCheck,aes(priorpredk1,priorpredk2,size=prop)) +
   scale_size(range=c(0,5)) +
   geom_point(shape=0) + guides(size="none") +
   ylab("Success Rate 2") +
@@ -95,14 +102,18 @@ priorCheck <- ggplot(predChecks,aes(priorpredk1,priorpredk2,size=prop)) +
   geom_point(aes(x=data$k1, y=data$k2), colour="red", shape=4) +
   theme_classic()
 
-# SOMETHING IS GOING WRONG IN THE ACTUAL PROP CALCULATIONS (the n is not representative)
-o.f <- draws_df %>%
-  group_by(postpredk1,postpredk2) %>%
-  summarize(freq=n()) %>%
-  ungroup() %>%
-  mutate(prop=freq/sum(freq))
+postCheck <- as_tibble(expand.grid(postpredk1 = seq(0, data$n1, 1), postpredk2 = seq(0, data$n2, 1), prop=0))
 
-posteriorCheck <- ggplot(o.f,aes(postpredk1,postpredk2,size=prop)) +
+for (i in 0:data$n1){
+  for (j in 0:data$n2){
+    match.preds <- sum(draws_df$postpredk1==i & draws_df$postpredk2==j)/nsamples
+    if (match.preds > 0){
+      postCheck$prop[postCheck$postpredk1==i & postCheck$postpredk2==j] = match.preds
+    }
+  }
+}
+
+posteriorPredCheck <- ggplot(postCheck,aes(postpredk1,postpredk2,size=prop)) +
     scale_size(range=c(0,5)) +
     geom_point(shape=0) + guides(size="none") +
     ylab("Success Rate 2") +
@@ -113,9 +124,9 @@ posteriorCheck <- ggplot(o.f,aes(postpredk1,postpredk2,size=prop)) +
     theme_classic()
 
 library(patchwork)
-priorCheck + posteriorCheck
+priorPredCheck + posteriorPredCheck
 
-## MISSING:: GENERATE THE CODE IN BRMS AND COMPARE
+## GENERATE THE CODE IN BRMS AND COMPARE
 d <- tibble(k=c(5,7), n=10)
 library(brms)
 m <- brms::brm(
