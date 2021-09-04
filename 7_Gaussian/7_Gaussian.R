@@ -71,3 +71,13 @@ ggplot(draws_df, aes(.iteration, mu, color=as.factor(.chain))) +
 ggplot(draws_df, aes(.iteration, sigma, color=as.factor(.chain))) +
   geom_line() +
   theme_classic()
+
+## Plotting a joint distribution of mu and sigma
+
+p <- ggplot(draws_df, aes(mu, sigma)) +
+  geom_point(alpha=0.1) +
+  geom_point(aes(x = mean(mu), y = mean(sigma)), color="red", size=10, shape=4) +
+  xlab("Mean") +
+  ylab("Standard Deviation") +
+  geom_rug(size=0.1) +
+  theme_classic()
