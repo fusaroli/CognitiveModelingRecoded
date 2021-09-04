@@ -1,0 +1,73 @@
+## Load libraries
+pacman::p_load(here, 
+               cmdstanr, 
+               posterior)
+
+# Define data
+x <- c(1.1, 1.9, 2.3, 1.8)
+n <- length(x)
+data <- list(x = x, n = n)
+df <- tibble(x = x, n = n) # for plotting
+
+## Define initial values
+myinits <- list(
+  list(theta=.1, thetaprior=.1),  # chain 1 starting value
+  list(theta=.9, thetaprior=.9))  # chain 2 starting value
+
+## Specify where the model is
+file <- file.path(here("7_Gaussian", "7_Gaussian.stan"))
+mod <- cmdstan_model(file, cpp_options = list(stan_threads = TRUE))
+
+samples <- mod$sample(
+  data = data,
+  seed = 123,
+  chains = 2,
+  parallel_chains = 2,
+  threads_per_chain = 2,
+  iter_warmup = 1000,
+  iter_sampling = 2000,
+  refresh = 500,
+  max_treedepth = 20,
+  adapt_delta = 0.99,
+)
+
+
+# The commands below are useful for a quick overview:
+samples$summary()  # summary, same as print(samples)
+samples$summary("mu", "mean", "sd") 
+samples$summary("sigma", "mean", "sd") 
+
+# Extract posterior samples 
+draws_df <- as_draws_df(samples$draws()) 
+
+# Now let's plot a histogram for theta. 
+ggplot(draws_df) +
+  geom_density(aes(mu), color="blue", alpha=0.3) +
+  geom_density(aes(muprior), color="red", alpha=0.3) +
+  xlab("Mean") +
+  ylab("Posterior Density") +
+  theme_classic()
+ggplot(draws_df) +
+  geom_density(aes(sigma), color="blue", alpha=0.3) +
+  geom_density(aes(sigmaprior), color="red", alpha=0.3) +
+  xlab("Mean") +
+  ylab("Posterior Density") +
+  theme_classic()
+
+# Now let's plot predictive checks for theta (prior and posterior)
+ggplot(draws_df) +
+  geom_density(aes(priorpredk), fill="red", linetype="dashed", alpha=0.1) +
+  geom_density(aes(postpredk), fill="blue", alpha=0.3) +
+  geom_density(data = df, aes(x), fill="black") +
+  xlab("Mean") +
+  ylab("Posterior Density") +
+  theme_classic()
+
+
+## Diagnostics
+ggplot(draws_df, aes(.iteration, mu, color=as.factor(.chain))) +
+  geom_line() +
+  theme_classic()
+ggplot(draws_df, aes(.iteration, sigma, color=as.factor(.chain))) +
+  geom_line() +
+  theme_classic()

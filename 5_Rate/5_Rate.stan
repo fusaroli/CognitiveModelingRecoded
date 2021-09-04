@@ -18,7 +18,7 @@ parameters {
 
 // The model to be estimated; prior and likelihood
 model {
-  // THe prior for theta is a uniform distribution between 0 and 1
+  // The prior for theta is a uniform distribution between 0 and 1
   theta ~ beta(1, 1);
   thetaprior ~ beta(1, 1);
   // theta ~ uniform(0, 1) ## equivalent to beta?
