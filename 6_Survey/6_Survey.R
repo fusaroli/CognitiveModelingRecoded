@@ -1,10 +1,13 @@
+## Load libraries
+pacman::p_load(here, 
+               cmdstanr, 
+               posterior)
 
-pacman::p_load(here, rstan, cmdstanr, posterior)
-
+# Define data
 data <- list(
-  k = c(16, 18, 22, 25, 27),
-  m = 5,
-  nmax = 500
+  k = c(16, 18, 22, 25, 27), # returned surveys per each helper
+  m = 5, # n of helpeer
+  nmax = 500 # man n of surveys
 )
 
 
@@ -31,16 +34,21 @@ samples <- mod$sample(
 )
 
 
-# Now the values for the monitored parameters are in the "samples" object, 
-# ready for inspection.
-
 # The commands below are useful for a quick overview:
 samples$summary()  # summary, same as print(samples)
-samples$summary("theta", "mean", "sd") # more specific summary
-samples$summary("n", "mean", "sd") # more specific summary
+samples$summary("theta", "mean", "sd") 
+samples$summary("n", "mean", "sd") 
 
-# Extract posterior samples and include sampling of the prior:
+# Extract posterior samples 
 draws_df <- as_draws_df(samples$draws()) 
+
+## Diagnositics
+ggplot(draws_df, aes(.iteration, theta, color=as.factor(.chain))) +
+  geom_line() +
+  theme_classic()
+ggplot(draws_df, aes(.iteration, n, color=as.factor(.chain))) +
+  geom_line() +
+  theme_classic()
 
 ## First calculate MLE:
 cc <- -Inf
@@ -49,8 +57,8 @@ ind <- 0
 for (i in 1:nrow(draws_df)) {
   logL <- 0
   for(j in 1:data$m) {   
-    logL <- logL+lgamma(draws_df$n[i]+1)-lgamma(data$k[j]+1)-lgamma(draws_df$n[i]-data$k[j]+1)
-    logL <- logL+data$k[j]*log(draws_df$theta[i])+(draws_df$n[i]-data$k[j])*log(1-draws_df$theta[i])
+    logL <- logL + lgamma(draws_df$n[i]+1) - lgamma(data$k[j]+1) - lgamma(draws_df$n[i]-data$k[j]+1)
+    logL <- logL + data$k[j] * log(draws_df$theta[i]) + (draws_df$n[i] - data$k[j]) * log(1-draws_df$theta[i])
   }
   if (logL>cc) {
     ind <- i
@@ -59,28 +67,15 @@ for (i in 1:nrow(draws_df)) {
 }
 # end MLE
 
-######################Plots#####################################################
-layout(matrix(c(2,0,1,3),2,2,byrow=T), width=c(2/3, 1/3), heights=c(1/3, 2/3))
-xhist <- hist(draws_df$n, plot=F)
-yhist <- hist(draws_df$theta, plot=F)
-top <- max(c(xhist$counts, yhist$counts))
-xrange <- c(0, data$nmax)
-yrange <- c(0, 1)
 
-par(mar=c(5, 5, 1, 1))
-plot(draws_df$n, draws_df$theta, xlim=xrange, ylim=yrange,ylab="", xlab="")
-axis(1)
-mtext("Number of Surveys", side=1,line=2.25, cex=1.2)
-axis(2, cex=1.2)
-las=0
-mtext("Rate of Return", side=2 ,line=2.25, cex=1.2)
-las=1
-points(mean(draws_df$n), mean(draws_df$theta), col="red", lwd=3, pch=4) #expectation
-points(draws_df$n[ind], draws_df$theta[ind], col="green", lwd=3, pch=10) #Maximum Likelihood
+p <- ggplot(draws_df, aes(n, theta)) +
+  geom_point(alpha=0.1) +
+  geom_point(aes(x = mean(n), y = mean(theta)), color="red", size=10, shape=4) +
+  geom_point(aes(x = draws_df$n[ind], y = draws_df$theta[ind]), color="lightblue", size=5) +
+  xlab("Number of Surveys") +
+  ylab("Rate of Return") +
+  geom_rug(size=0.1) +
+  theme_classic()
 
-par(mar=c(0, 4, 1, 1))
-barplot(xhist$counts, axes=FALSE, ylim=c(0, top), space=0,col="lightblue")
+p1 <- ggExtra::ggMarginal(p, type="histogram", fill = "lightblue")
 
-par(mar=c(4, 0, 1, 3))
-barplot(yhist$counts, axes=FALSE, xlim=c(0, top), space=0, horiz=TRUE,
-        col="lightblue")
