@@ -1,7 +1,8 @@
 ## Load libraries
 pacman::p_load(here, 
                cmdstanr, 
-               posterior)
+               posterior,
+               brms)
 
 # Define data
 x <- c(1.1, 1.9, 2.3, 1.8)
@@ -76,8 +77,26 @@ ggplot(draws_df, aes(.iteration, sigma, color=as.factor(.chain))) +
 
 p <- ggplot(draws_df, aes(mu, sigma)) +
   geom_point(alpha=0.1) +
-  geom_point(aes(x = mean(mu), y = mean(sigma)), color="red", size=10, shape=4) +
+  geom_point(aes(x = mean(mu), y = mean(sigma)), color="red", size=5, shape=4) +
   xlab("Mean") +
   ylab("Standard Deviation") +
-  geom_rug(size=0.1) +
+  geom_rug(size = 0.1) +
   theme_classic()
+
+m<- brm(x ~ 1,
+        df,
+        family=gaussian,
+        prior=c(
+          prior(normal(0, sqrt(1000)),class=Intercept),
+          prior(uniform(0,10), class=sigma)),
+        sample_prior=T,seed = 123,
+        chains = 2,
+        cores = 2,
+        iter = 2000,
+        backend = "cmdstanr",
+        threads = threading(2),
+        control = list(
+          max_treedepth = 20,
+          adapt_delta = 0.99)
+)
+stancode(m)
