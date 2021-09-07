@@ -41,6 +41,8 @@ model {
   sigma ~ normal(0, 10);
   muprior ~ normal(0, 10);
   sigmaprior ~ normal(0, 10);
+  r ~ normal(0, 0.5);
+  rprior ~ normal(0, 0.5);
   
   // Data
   x ~ multi_normal(mu, T);
