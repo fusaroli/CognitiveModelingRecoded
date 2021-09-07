@@ -9,6 +9,8 @@ CognitiveModelingRecoded.Rproj
 7_Gaussian_threads
 8_SevenScientists_threads
 8_SevenScientists_b_threads
+9_RepeatedIQ_threads
+10_PearsonCorrelation_threads
 
 # History files
 .Rhistory
