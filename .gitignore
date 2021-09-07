@@ -12,6 +12,7 @@ CognitiveModelingRecoded.Rproj
 9_RepeatedIQ_threads
 10_PearsonCorrelation_threads
 11_PearsonCorrelationMeasurement_threads
+12_Kappa_threads
 
 # History files
 .Rhistory
