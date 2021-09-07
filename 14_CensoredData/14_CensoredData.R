@@ -41,3 +41,8 @@ ggplot(draws_df) +
   xlab("Predictive Checks") +
   ylab("Posterior Density") +
   theme_classic()
+
+## BRMS
+#m <- brm(
+#  
+#)
