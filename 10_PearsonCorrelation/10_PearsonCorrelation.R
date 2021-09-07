@@ -122,3 +122,30 @@ posterior_cp <- as.array(stanfit)
 
 mcmc_trace(posterior_cp)
 mcmc_rank_overlay(posterior_cp)
+
+
+## Now in brms
+m <- brm(
+  bf(mvbind(x1,x2) ~ 1) + set_rescor(rescor=TRUE),
+  df,
+  family = gaussian,
+  prior = c(
+    prior(normal(0, 10), class = Intercept, resp = x1),
+    prior(normal(0, 10), class = sigma, resp = x1),
+    prior(normal(0, 10), class = Intercept, resp = x2),
+    prior(normal(0, 10), class = sigma, resp = x2),
+    prior(lkj(1), class = rescor)),
+  sample_prior = T,
+  seed = 123,
+  chains = 2,
+  cores = 2,
+  iter = 2000,
+  backend = "cmdstanr",
+  threads = threading(2),
+  control = list(
+    max_treedepth = 20,
+    adapt_delta = 0.99)
+)
+
+stancode(m)
+  
