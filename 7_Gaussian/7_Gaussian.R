@@ -8,12 +8,7 @@ pacman::p_load(here,
 x <- c(1.1, 1.9, 2.3, 1.8)
 n <- length(x)
 data <- list(x = x, n = n)
-df <- tibble(x = x, n = n) # for plotting
-
-## Define initial values
-myinits <- list(
-  list(theta=.1, thetaprior=.1),  # chain 1 starting value
-  list(theta=.9, thetaprior=.9))  # chain 2 starting value
+df <- tibble(x = x, n = n) # for plotting and brms
 
 ## Specify where the model is
 file <- file.path(here("7_Gaussian", "7_Gaussian.stan"))
@@ -41,7 +36,7 @@ samples$summary("sigma", "mean", "sd")
 # Extract posterior samples 
 draws_df <- as_draws_df(samples$draws()) 
 
-# Now let's plot a histogram for theta. 
+# Now let's plot a histogram for mu and sigma. 
 ggplot(draws_df) +
   geom_density(aes(mu), color="blue", alpha=0.3) +
   geom_density(aes(muprior), color="red", alpha=0.3) +
@@ -51,7 +46,7 @@ ggplot(draws_df) +
 ggplot(draws_df) +
   geom_density(aes(sigma), color="blue", alpha=0.3) +
   geom_density(aes(sigmaprior), color="red", alpha=0.3) +
-  xlab("Mean") +
+  xlab("Sigma") +
   ylab("Posterior Density") +
   theme_classic()
 
