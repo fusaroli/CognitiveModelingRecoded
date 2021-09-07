@@ -34,3 +34,9 @@ samples <- mod$sample(
   adapt_delta = 0.99,
 )
 })
+
+
+# ADD DIAGNOSTICS
+
+## FOR BRMS CHECK
+# https://discourse.mc-stan.org/t/piecewise-linear-mixed-models-with-a-random-change-point/5306/9?u=fusaroli
