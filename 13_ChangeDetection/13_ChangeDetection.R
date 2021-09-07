@@ -1,7 +1,8 @@
 pacman::p_load(
   cmdstanr,
   posterior,
-  here
+  here,
+  job
 )
 
 c <- scan(here("13_ChangeDetection", "13_data.txt"))
@@ -18,7 +19,7 @@ myinits <- list(
 ## Specify where the model is
 file <- file.path(here("13_ChangeDetection", "13_ChangeDetection.stan"))
 mod <- cmdstan_model(file, cpp_options = list(stan_threads = TRUE))
-
+job::job({
 samples <- mod$sample(
   data = data,
   seed = 123,
@@ -32,3 +33,4 @@ samples <- mod$sample(
   max_treedepth = 20,
   adapt_delta = 0.99,
 )
+})
