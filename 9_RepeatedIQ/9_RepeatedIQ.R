@@ -4,7 +4,8 @@ pacman::p_load(
   tidyverse,
   here,
   cmdstanr,
-  posterior
+  posterior,
+  brms
 )
 
 ## Define the data
@@ -89,3 +90,25 @@ ggplot(draws_df) +
   ylab("Posterior Density") +
   theme_classic()
 
+## Now BRMS
+
+m <- brm(
+  bf(IQ ~ 0 + ID, sigma ~ 1),
+  df,
+  family = gaussian,
+  prior = c(
+    prior(normal(100, 15), class = b),
+    prior(normal(0, 15), class = Intercept, dpar = sigma)),
+  sample_prior = T,
+  seed = 123,
+  chains = 2,
+  cores = 2,
+  iter = 2000,
+  backend = "cmdstanr",
+  threads = threading(2),
+  control = list(
+    max_treedepth = 20,
+    adapt_delta = 0.99)
+)
+
+stancode(m)
