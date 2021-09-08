@@ -14,17 +14,33 @@ transformed data {
   psi = .5;
 }
 
-// The parameters accepted by the model. Our model
-// accepts two parameters 'mu' and 'sigma'.
 parameters {
-  real mu;
-  real<lower=0> sigma;
+  // Second Group Has Some Unknown Greater Rate Of Success
+  real<lower=.5,upper=1> phi; 
+  real<lower=.5,upper=1> phiprior;
 }
 
-// The model to be estimated. We model the output
-// 'y' to be normally distributed with mean 'mu'
-// and standard deviation 'sigma'.
+transformed parameters {
+  vector[2] lp_parts[p];
+  // Data Follow Binomial With Rate Given By Each Person's Group Assignment
+  for (i in 1:p) {
+    lp_parts[i,1] = log(.5) + binomial_lcdf(k[i] | n, phi);
+    lp_parts[i,2] = log(.5) + binomial_lcdf(k[i] | n, psi); 
+  }
+}
+
 model {
-  y ~ normal(mu, sigma);
+ phiprior ~ uniform(.5,1);
+ 
+  for (i in 1:p)
+    target += log_sum_exp(lp_parts[i]);  
 }
-
+generated quantities {
+  int<lower = 0,upper = 1> z[p];
+  
+  for (i in 1:p) {
+    vector[2] prob;
+    prob = softmax(lp_parts[i]);
+    z[i] = bernoulli_rng(prob[1]);
+  }
+}

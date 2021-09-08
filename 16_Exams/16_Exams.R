@@ -3,3 +3,34 @@ p <- length(k)  # number of people
 n <- 40  # number of questions
 
 data <- list(p=p, k=k, n=n) # to be passed on to Stan
+
+## Specify where the model is
+file <- file.path(here("16_Exams", "16_Exams.stan"))
+mod <- cmdstan_model(file, cpp_options = list(stan_threads = TRUE))
+
+samples <- mod$sample(
+    data = data,
+    seed = 123,
+    chains = 2,
+    parallel_chains = 2,
+    threads_per_chain = 2,
+    iter_warmup = 2000,
+    iter_sampling = 2000,
+    refresh = 500,
+    max_treedepth = 20,
+    adapt_delta = 0.99,
+)
+
+samples$summary()  # summary, same as print(samples)
+
+# Extract posterior samples 
+draws_df <- as_draws_df(samples$draws()) 
+
+# Now let's plot a histogram for mu and sigma. 
+ggplot(draws_df) +
+  geom_density(aes(phiprior), fill="red", alpha=0.3) +
+  geom_density(aes(`phi`), fill="blue", alpha=0.3) +
+  geom_vline(xintercept=0.25) +
+  xlab("Phi") +
+  ylab("Posterior Density") +
+  theme_classic()
