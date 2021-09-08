@@ -24,7 +24,7 @@ model {
   // Observed Data
   z_observed ~ binomial(n, theta); 
   // Unobserved Data
-  target += nfails * log(binomial_cdf(25 , n, theta) - binomial_cdf(14 , n, theta));
+  target += nfails * log(binomial_cdf(25 | n, theta) - binomial_cdf(14 | n, theta));
 }
 
 generated quantities {

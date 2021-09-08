@@ -15,7 +15,7 @@ samples <- mod$sample(
     threads_per_chain = 2,
     iter_warmup = 2000,
     iter_sampling = 2000,
-    refresh = 10,
+    refresh = 500,
     ##init = myinits,
     max_treedepth = 20,
     adapt_delta = 0.99,
