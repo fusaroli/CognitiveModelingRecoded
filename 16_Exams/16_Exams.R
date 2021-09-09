@@ -34,3 +34,41 @@ ggplot(draws_df) +
   xlab("Phi") +
   ylab("Posterior Density") +
   theme_classic()
+
+
+# The data
+df <- tibble(k = k, n = n)
+
+mix <- mixture(binomial, binomial)
+f0 <- bf(
+  k|(trials(n)) ~ 1
+)
+
+prior <- c(
+  prior(normal(0, 0.001), class=Intercept, dpar = mu1),
+  prior(normal(0, 1), class=Intercept, dpar = mu2)
+)
+
+
+
+# Fit it!
+
+m <- brm(
+  f0,
+  df,
+  family = mix,
+  prior = prior,
+  sample_prior = T,
+  seed = 123,
+  chains = 2,
+  cores = 2,
+  iter = 2000,
+  backend = "cmdstanr",
+  threads = threading(2),
+  control = list(
+    max_treedepth = 20,
+    adapt_delta = 0.99)
+)
+
+stancode(m)
+

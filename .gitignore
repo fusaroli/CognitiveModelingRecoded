@@ -16,6 +16,7 @@ CognitiveModelingRecoded.Rproj
 13_ChangeDetection_threads
 14_CensoredData_threads
 15_Planes_threads
+16_Exams_threads
 
 # History files
 .Rhistory

@@ -2,7 +2,8 @@ pacman::p_load(
   cmdstanr,
   posterior,
   here,
-  job
+  job,
+  brms
 )
 
 c <- scan(here("13_ChangeDetection", "13_data.txt"))
@@ -43,36 +44,39 @@ samples <- mod$sample(
 # The data
 df <- tibble(c=c, t=t)
 
-# The model
-m_f <- bf(
-  c ~ Intercept * step(change - t) +  # Section 1
-    (slope1 * change + slope2 * (age - change)) * step(age - change),  # Section 2
-  Intercept + slope1 + slope2 ~ 1,  # Fixed intercept and slopes
-  change ~ 1 + (1|person),  # Per-person changepoints around pop mean
-  nl = TRUE
-)
-
 bform <- bf(
-  c ~ b0 + b1 * (age - omega) * step(omega - age) + 
-    b2 * (age - omega) * step(age - omega),
-  b0 + b1 + b2 + alpha ~ 1 + (1|person),
-  # to keep omega within the age range of 0 to 10
-  nlf(omega ~ inv_logit(alpha) * 10),
+  c ~ Intercept1 * step(change - t) +  # Section 1
+    Intercept2 * step(t - change),  # Section 2,
+  Intercept1 + Intercept2 ~ 1,  # Fixed intercept and slopes
+  change ~ 1,  # Per-person changepoints around pop mean
   nl = TRUE
 )
 
 # Priors
-bprior3 <- prior(normal(0, 5), nlpar = "Intercept") +
-  prior(normal(0, 2), nlpar = "slope1") +
-  prior(normal(0, 2), nlpar = "slope2") +
-  prior(uniform(0, 10), nlpar = "change")  # Within observed range
+bprior <- prior(normal(35, 10), nlpar = "Intercept1") +
+  prior(normal(35, 10), nlpar = "Intercept2") +
+  prior(uniform(0, 1178), nlpar = "change")  # Within observed range
 
-# Initial values
-inits3 = list(list(
-  slope1 = slope1,
-  slope2 = slope2,
-  Intercept = intercept
-))
+
 
 # Fit it!
-fit3 <- brm(bform3, data = df, prior = bprior3, chains = 1, inits = inits3)
+
+m <- brm(
+  bform,
+  df,
+  family = gaussian,
+  prior = bprior,
+  sample_prior = T,
+  seed = 123,
+  chains = 1,
+  cores = 1,
+  iter = 2000,
+  refresh=10,
+  backend = "cmdstanr",
+  threads = threading(2),
+  control = list(
+    max_treedepth = 20,
+    adapt_delta = 0.99)
+)
+
+stancode(m)

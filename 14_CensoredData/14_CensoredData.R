@@ -1,5 +1,5 @@
 nfails <- 949  
-n <- 50  # Number of questionsin each test 
+n <- 50  # Number of questions in each test 
 z_observed <- 30  # Score on the successful trial
 
 data <- list(nfails = nfails, n = n, z_observed = z_observed) # to be passed on to Stan
