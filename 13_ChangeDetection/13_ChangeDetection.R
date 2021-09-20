@@ -26,13 +26,13 @@ samples <- mod$sample(
   seed = 123,
   chains = 1,
   parallel_chains = 1,
-  threads_per_chain = 4,
-  iter_warmup = 2000,
-  iter_sampling = 2000,
+  threads_per_chain = 1,
+  iter_warmup = 200,
+  iter_sampling = 300,
   refresh = 10,
   init = myinits,
   max_treedepth = 20,
-  adapt_delta = 0.99,
+  adapt_delta = 0.8,
 )
 })
 
@@ -70,13 +70,13 @@ m <- brm(
   seed = 123,
   chains = 1,
   cores = 1,
-  iter = 2000,
+  iter = 200,
   refresh=10,
   backend = "cmdstanr",
   threads = threading(2),
   control = list(
     max_treedepth = 20,
-    adapt_delta = 0.99)
+    adapt_delta = 0.8)
 )
 
 stancode(m)
