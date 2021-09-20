@@ -39,3 +39,49 @@ samples <- mod$sample(
 samples
 
 samples$summary()  # summary, same as print(samples)
+## BLABLA DIAGNOSTICS
+
+# BRMS
+df <- tibble(
+  truth = cheatt.dat$V1,  # truth = 1 if cheater
+  k = apply(cheat.dat, 1, sum), # total correct per participant
+  n = 40, # total trials
+  ID = as.factor(seq(p)))
+        
+
+## Basic model
+
+cheating_f <- bf(
+  k | trials(n) ~ 1 + (1|p|ID),
+  theta1 ~ 0 + ID
+)
+
+mix1 <- mixture(binomial, binomial, order="none")
+
+get_prior(cheating_f, df, mix1)
+
+priormix1 <- c(
+  prior(normal(0,1.5), class= Intercept, dpar=mu1),
+  prior(normal(0,1.5), class= Intercept, dpar=mu2),
+  prior(normal(0,1), class= sd, dpar=mu1),
+  prior(normal(0,1), class= sd, dpar=mu2),
+  prior(normal(0,1.5), class= b, dpar=theta1)
+)
+
+m1 <- brm(
+  malinger_f1,
+  df,
+  mix1,
+  prior=priormix1,
+  sample_prior = T,
+  chains = 2,
+  cores = 2,
+  iter = 4000,
+  refresh = 200,
+  backend = "cmdstanr",
+  threads = threading(2),
+  control = list(
+    max_treedepth = 20,
+    adapt_delta = 0.99)
+)
+m1

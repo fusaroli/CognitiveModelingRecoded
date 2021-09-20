@@ -82,7 +82,7 @@ m <- brm(
 pp_check(m, ndraws=100)
 
 
-# would it work having both mean and theta varying by individual? NO!
+# would it work having both mean and theta varying by individual? 
 
 malinger_f1 <- bf(
   correct | trials(trials) ~ 1 + (1|p|ID),
