@@ -1,22 +1,6 @@
 # My stuff
 CognitiveModelingRecoded.Rproj
-1_Rate_threads
-2_Rate_threads
-3_Rate_threads
-4_Rate_threads
-5_Rate_threads
-6_Survey_threads
-7_Gaussian_threads
-8_SevenScientists_threads
-8_SevenScientists_b_threads
-9_RepeatedIQ_threads
-10_PearsonCorrelation_threads
-11_PearsonCorrelationMeasurement_threads
-12_Kappa_threads
-13_ChangeDetection_threads
-14_CensoredData_threads
-15_Planes_threads
-16_Exams_threads
+*_threads
 
 # History files
 .Rhistory
