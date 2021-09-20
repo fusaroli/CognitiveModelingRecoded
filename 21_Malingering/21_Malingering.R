@@ -85,7 +85,7 @@ pp_check(m, ndraws=100)
 # would it work having both mean and theta varying by individual? NO!
 
 malinger_f1 <- bf(
-  correct | trials(trials) ~ 1 + (1|ID),
+  correct | trials(trials) ~ 1 + (1|p|ID),
   theta1 ~ 0 + ID
 )
 
@@ -109,12 +109,12 @@ m1 <- brm(
   sample_prior = T,
   chains = 2,
   cores = 2,
-  iter = 2000,
-  refresh = 100,
+  iter = 4000,
+  refresh = 200,
   backend = "cmdstanr",
   threads = threading(2),
   control = list(
     max_treedepth = 20,
-    adapt_delta = 0.9)
+    adapt_delta = 0.99)
 )
-
+m1

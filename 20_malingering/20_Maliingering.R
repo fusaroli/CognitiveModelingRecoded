@@ -115,10 +115,12 @@ malinger_f1 <- bf(
 
 mix1 <- mixture(binomial, binomial, order="none")
 
-get_prior(malinger_f, df, mix)
+get_prior(malinger_f1, df, mix1)
 
 priormix1 <- c(
-  prior(normal(0,1.5), class= b, dpar=theta1)
+  prior(normal(0,1.5), class= b, dpar=theta1),
+  prior(normal(0,1.5), class= Intercept, dpar=mu1),
+  prior(normal(0,1.5), class= Intercept, dpar=mu2)
 )
 
 m1 <- brm(
