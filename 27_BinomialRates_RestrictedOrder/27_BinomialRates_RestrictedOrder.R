@@ -11,7 +11,7 @@ log.BF01 <- lchoose(n1, s1) + lchoose(n2, s2) + log(n1 + 1) + log(n2 + 1) -
   lchoose((n1 + n2), (s1 + s2)) - log(n1 + n2 + 1)
 BF01 <- exp(log.BF01)
 
-file <- file.path(here("27_BinomialRates_RestrictedOrder", "27_BinomialRates_RestrictedOrder.stan"))
+file <- file.path(here("26_BinomialRates", "26_BinomialRates.stan"))
 mod <- cmdstan_model(file, cpp_options = list(stan_threads = TRUE), pedantic = TRUE)
 
 samples <- mod$sample(
@@ -58,6 +58,14 @@ ggplot(draws_df) +
   ylab("theta2") +
   theme_classic()
 
+## Against each other
+ggplot(draws_df) +
+  geom_point(aes(thetaprior1, thetaprior2), alpha=0.3, color="blue") +
+  geom_point(aes(theta1, theta2), alpha=0.3, color="blue") +
+  xlab("theta1") +
+  ylab("theta2") +
+  theme_classic()
+
 
 # Now let's plot predictive checks for theta (prior and posterior)
 p1 <- ggplot(draws_df) +
@@ -75,58 +83,3 @@ p2 <- ggplot(draws_df) +
   xlab("Condom users") +
   ylab("Posterior Density") +
   theme_classic()
-
-library(patchwork)
-p1+p2
-
-######################################################
-# H1: delta is unrestricted
-######################################################
-
-# Collect posterior samples across all chains:
-delta.posterior  <- extract(samples)$delta
-delta.prior      <- extract(samples)$deltaprior
-
-#============ BFs based on logspline fit ===========================
-library(polspline) # this package can be installed from within R
-fit.prior     <- logspline(draws_df$deltaprior, lbound=-1, ubound=1) # note the bounds.
-fit.posterior <- logspline(draws_df$delta, lbound=-1, ubound=1)
-
-# 95% confidence interval:
-x0 <- qlogspline(0.025,fit.posterior)
-x1 <- qlogspline(0.975,fit.posterior)
-
-posterior <- dlogspline(0, fit.posterior) # this gives the pdf at point delta = 0
-prior     <- dlogspline(0, fit.prior)     # based on the logspline fit
-BF01      <- prior/posterior
-# 1/BF01 gives 2.14 -- Exact solution: 2.223484
-BF01      <- posterior 
-# because we know the height of the prior equals 1 at delta = 0 
-# 1/BF01 gives 2.17
-
-#============ Plot Prior and Posterior  ===========================
-ggplot(draws_df) +
-  geom_density(aes(deltaprior), linetype="dashed", color="red") +
-  geom_density(aes(delta), color="blue") +
-  geom_point(aes(x=0, y = posterior), colour="blue", size=4)+
-  geom_point(aes(x=0, y = prior), colour="red", size=4)+
-  xlab("BF for mean") +
-  ylab("density") +
-  geom_label(
-    label=as.character(round(dlogspline(0, fit.posterior),2)), 
-    x = 0,
-    y = posterior +.05,
-    label.padding = unit(0.55, "lines"), # Rectangle size around label
-    label.size = 0.35,
-    color = "black",
-    fill="#69b3a2", alpha=0.3) +
-  geom_label(
-    label=as.character(round(2*dnorm(0, 0, 1),2)), 
-    x = 0,
-    y = prior +.05,
-    label.padding = unit(0.55, "lines"), # Rectangle size around label
-    label.size = 0.35,
-    color = "black",
-    fill="#69b3a2", alpha=0.3) +
-  theme_classic()
-
