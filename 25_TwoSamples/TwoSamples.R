@@ -96,7 +96,7 @@ x1 <- qlogspline(0.975,fit.posterior)
 
 posterior <- dlogspline(0, fit.posterior) # this gives the pdf at point delta = 0
 prior     <- dlogspline(0, logspline(draws_df$alphaprior))  # height of order-restricted prior at delta = 0
-BF01      <- posterior/prior
+BF01      <- prior/posterior
 BF01
 
 #============ Plot Prior and Posterior  ===========================
