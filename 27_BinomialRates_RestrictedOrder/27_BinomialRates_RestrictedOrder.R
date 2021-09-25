@@ -60,7 +60,7 @@ ggplot(draws_df) +
 
 ## Against each other
 ggplot(draws_df) +
-  geom_point(aes(thetaprior1, thetaprior2), alpha=0.3, color="blue") +
+  geom_point(aes(thetaprior1, thetaprior2), alpha=0.3, color="grey") +
   geom_point(aes(theta1, theta2), alpha=0.3, color="blue") +
   xlab("theta1") +
   ylab("theta2") +
@@ -71,7 +71,7 @@ ggplot(draws_df) +
 p1 <- ggplot(draws_df) +
   geom_density(aes(PredictedOutcomePrior1), fill="red", linetype="dashed", alpha=0.3) +
   geom_density(aes(PredictedOutcomePosterior1), fill="blue", alpha=0.3) +
-  geom_point(aes(x=s1, y=0), color="grey") +
+  geom_point(aes(x=s1, y=0), color="black") +
   xlab("Condom users") +
   ylab("Posterior Density") +
   theme_classic()
@@ -79,7 +79,47 @@ p1 <- ggplot(draws_df) +
 p2 <- ggplot(draws_df) +
   geom_density(aes(PredictedOutcomePrior2), fill="red", linetype="dashed", alpha=0.3) +
   geom_density(aes(PredictedOutcomePosterior2), fill="blue", alpha=0.3) +
-  geom_point(aes(x=s2, y=0), color="grey") +
+  geom_point(aes(x=s2, y=0), color="black") +
   xlab("Condom users") +
   ylab("Posterior Density") +
+  theme_classic()
+
+p1+p2
+
+
+#####################################################
+# Order-restriction. H2: delta < 0
+######################################################
+
+#============ BFs based on logspline fit ===========================
+library(polspline) # this package can be installed from within R
+
+fit.posterior <- logspline(draws_df$delta, lbound=0, ubound=1)
+posterior     <- dlogspline(0, fit.posterior) # this gives the pdf at point delta = 0
+BF02          <- 1/(posterior/2) # 0.26, BF20 = 3.78
+
+#============ Plot Prior and Posterior  ===========================
+ggplot(draws_df) +
+  geom_density(aes(deltaprior), linetype="dashed", color="red") +
+  geom_density(aes(delta), color="blue") +
+  geom_point(aes(x=0, y = posterior), colour="blue", size=4)+
+  geom_point(aes(x=0, y = prior), colour="red", size=4)+
+  xlab("BF for mean") +
+  ylab("density") +
+  geom_label(
+    label=as.character(round(dlogspline(0, fit.posterior),2)), 
+    x = .1,
+    y = posterior,
+    label.padding = unit(0.55, "lines"), # Rectangle size around label
+    label.size = 0.35,
+    color = "black",
+    fill="#69b3a2", alpha=0.3) +
+  geom_label(
+    label=as.character(round(2*dnorm(0, 0, 1),2)), 
+    x = .1,
+    y = prior,
+    label.padding = unit(0.55, "lines"), # Rectangle size around label
+    label.size = 0.35,
+    color = "black",
+    fill="#69b3a2", alpha=0.3) +
   theme_classic()
