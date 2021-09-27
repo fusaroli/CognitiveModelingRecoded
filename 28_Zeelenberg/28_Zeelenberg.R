@@ -53,13 +53,13 @@ ggplot(draws_df)+
 
 
 ggplot(draws_df)+
-  #geom_density(aes(mualphaprior), fill="red", alpha=0.3) +
+  geom_density(aes(mualphaprior), fill="red", alpha=0.3) +
   geom_density(aes(mualpha), fill="blue", alpha=0.3) +
   theme_classic()
 
 ggplot(draws_df)+
-  geom_density(aes(sigmadeltaprior), fill="red", alpha=0.3) +
-  geom_density(aes(sigmadelta), fill="blue", alpha=0.3) +
+  geom_density(aes(sigmaalphaprior), fill="red", alpha=0.3) +
+  geom_density(aes(sigmaalpha), fill="blue", alpha=0.3) +
   theme_classic()
 
 ggplot(draws_df)+
@@ -74,11 +74,12 @@ ggplot(draws_df)+
 
 
 ggplot(draws_df)+
-  geom_density(aes(deltaprior), fill="red", alpha=0.3) +
-  geom_density(aes(delta), fill="green", alpha=0.3) +
-  geom_density(aes(`delta_ind[1]`), fill="blue", alpha=0.3) +
-  geom_density(aes(`delta_ind[2]`), fill="blue", alpha=0.3) +
-  geom_density(aes(`delta_ind[3]`), fill="blue", alpha=0.3)
+  geom_density(aes(mualphaprior), fill="red", alpha=0.3) +
+  geom_density(aes(mualpha), fill="green", alpha=0.3) +
+  geom_density(aes(`alpha[1]`), fill="blue", alpha=0.3) +
+  geom_density(aes(`alpha[2]`), fill="blue", alpha=0.3) +
+  geom_density(aes(`alpha[3]`), fill="blue", alpha=0.3) +
+  theme_classic()
 
 
 
@@ -92,7 +93,7 @@ x1 <- qlogspline(0.975,fit.posterior)
 
 posterior     <- dlogspline(0, fit.posterior) # this gives the pdf at point delta = 0
 prior         <- 2 * dnorm(0)  # height of order--restricted prior at delta = 0
-BF01          <- posterior/prior
+BF01          <- prior/posterior
 
 
 df <- tibble(successes=c(sb,sb), trials=21, ID=rep(1:ns, 2), condition=rep(c("both", "none"), each=ns))
