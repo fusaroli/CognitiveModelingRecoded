@@ -18,12 +18,17 @@ ka         <- na - num.errors
 nsa        <- length(ka)
 
 # two-sided p-value = .72
-t.test(kc / nc, ka / na, alternative=c("two.sided"), paired=F)
+t.test(kc / nc, ka / na, alternative=c("greater"), paired=F)
 
 data <- list(nc=nc,kc=kc,nsc=nsc,na=na,ka=ka,nsa=nsa) # to be passed on to Stan
 
-file <- file.path(here("29_geurts", "29_geurts.stan"))
+file <- file.path(here("30_geurts", "30_geurts.stan"))
 mod <- cmdstan_model(file, cpp_options = list(stan_threads = TRUE), pedantic = TRUE)
+
+myinits <- list(
+  list(mu=0, sigma=1, delta=.3, phi_a=rnorm(nsa), phi_c=rnorm(nsc), deltaprior=.3),
+  list(mu=-.8, sigma=2, delta=.5, phi_a=rnorm(nsa), phi_c=rnorm(nsc),
+       deltaprior=.5))
 
 samples <- mod$sample(
   data = data,
@@ -34,7 +39,7 @@ samples <- mod$sample(
   iter_warmup = 2000,
   iter_sampling = 2000,
   refresh = 500,
-  #init = myinits,
+  init = myinits,
   max_treedepth = 20,
   adapt_delta = 0.99,
 )
@@ -65,15 +70,15 @@ ggplot(draws_df)+
 
 #============ BFs based on logspline fit ===========================
 library(polspline) # this package can be installed from within R
-fit.posterior <- logspline(draws_df$delta)
-fit.prior <- logspline(draws_df$deltaprior)
+fit.posterior <- logspline(draws_df$delta, lbound=0)
+fit.prior <- logspline(draws_df$deltaprior, lbound=0)
 # 95% confidence interval:
 x0 <- qlogspline(0.025,fit.posterior)
 x1 <- qlogspline(0.975,fit.posterior)
 
 posterior     <- dlogspline(0, fit.posterior) # this gives the pdf at point delta = 0
 prior         <- dlogspline(0, fit.prior)  # height of order--restricted prior at delta = 0
-BF01          <- posterior/prior
+BF01          <- prior/posterior
 BF01 
 
 df <- tibble(
@@ -86,7 +91,7 @@ geurts_f <- bf(successes|trials(words) ~ 1 + condition + (1|gr(ID, by="condition
 
 geurts_p <- c(
   prior(normal(0,1), class = Intercept),
-  prior(normal(0, 0.5), class = b),
+  prior(normal(0, 0.5), class = b, lb = 0),
   prior(normal(0,0.5), class = sd)
 )
 
