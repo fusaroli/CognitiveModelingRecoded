@@ -14,17 +14,23 @@ data {
 parameters {
   real<lower=0,upper=1> alpha;
   real<lower=0,upper=1> beta;
+  real<lower=0,upper=1> alphaprior;
+  real<lower=0,upper=1> betaprior;
 }
 
 transformed parameters {
   
   matrix<lower=0,upper=1>[ns,nt] theta;
+  vector<lower=0,upper=1>[nt] thetaprior;
   
   // Retention Rate At Each Lag For Each Subject Decays Exponentially
   for (i in 1:ns) {
     for (j in 1:nt) {
       theta[i,j] = fmin(1, exp(-alpha * t[j]) + beta);
     }
+  }
+  for (w in 1:nt) {
+    thetaprior[w] = fmin(1, exp(-alphaprior * t[w]) + betaprior);
   }
 }
 
@@ -35,6 +41,8 @@ model {
   // Priors
   alpha ~ beta(1, 1);  // can be removed
   beta ~ beta(1, 1);  // can be removed
+  alphaprior ~ beta(1, 1);  // can be removed
+  betaprior ~ beta(1, 1);  // can be removed
   
   // Observed Data
   for (i in 1:(ns - 1))
@@ -43,10 +51,14 @@ model {
 }
 
 generated quantities {
-  int<lower=0,upper=n> predk[ns,nt];
+  int<lower=0,upper=n> postpredk[ns,nt];
+  int<lower=0,upper=n> priorpredk[nt];
   
   // Predicted Data
   for (i in 1:ns)
     for (j in 1:nt)
-      predk[i,j] = binomial_rng(n , theta[i,j]);
+      postpredk[i,j] = binomial_rng(n , theta[i,j]);
+  
+  for (w in 1:nt)
+      priorpredk[w] = binomial_rng(n , thetaprior[w]);
 }

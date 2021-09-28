@@ -3,8 +3,10 @@ pacman::p_load(
   here,
   cmdstanr,
   posterior,
+  tidybayes,
   brms,
-  bayesplot
+  bayesplot,
+  patchwork
 )
 
 t     <- c(1, 2, 4, 7, 12, 21, 35, 59, 99, 200)
@@ -23,11 +25,20 @@ n <- 18
 
 data <- list(k=k, n=n, t=t, ns=ns, nt=nt) # To be passed on to Stan
 
+df <- tibble(
+  successes = as.vector(k1),
+  trials = 18,
+  timeLag = rep(1:10, each=4),
+  ID = rep(1:4, 10))
+
+data_file <- tempfile(fileext = ".json")
+write_stan_json(data, data_file)
+
 file <- file.path(here("31_MemoryRetention", "31_MemoryRetention_1.stan"))
 mod <- cmdstan_model(file, cpp_options = list(stan_threads = TRUE), pedantic = TRUE)
 
 samples <- mod$sample(
-  data = data,
+  data = data_file,
   seed = 123,
   chains = 2,
   parallel_chains = 2,
@@ -35,7 +46,6 @@ samples <- mod$sample(
   iter_warmup = 2000,
   iter_sampling = 2000,
   refresh = 500,
-  init = myinits,
   max_treedepth = 20,
   adapt_delta = 0.99,
 )
@@ -54,8 +64,8 @@ ggplot(draws_df)+
   theme_classic()
 
 ggplot(draws_df)+
-  geom_point(aes(alphaprior, betaprior), fill="red", alpha=0.3) +
-  geom_density(aes(alpha, beta), fill="blue", alpha=0.3) +
+  geom_point(aes(alphaprior, betaprior), color="red", alpha=0.3) +
+  geom_point(aes(alpha, beta), color="blue", alpha=0.3) +
   theme_classic()
 
 ## 
@@ -70,34 +80,39 @@ p <- ggplot(draws_df, aes(alpha, beta)) +
 p1 <- ggExtra::ggMarginal(p, type="histogram", fill = "lightblue")
 
 # Predictive checks as in the book (STILL TO FIX)
-nsamples=nrow(draws_df)
 
-priorCheck <- draws_df %>%
-  group_by(priorpredk1, priorpredk2) %>%
-  summarise(prop = n()/nsamples)
+# extract thetaprior
 
-priorPredCheck <- ggplot(priorCheck,aes(priorpredk1,priorpredk2,size=prop)) +
-  scale_size(range=c(0,5)) +
-  geom_point(shape=0) + guides(size="none") +
-  ylab("Success Rate 2") +
-  xlab("Success Rate 1") +
-  scale_y_continuous(minor_breaks=NULL,breaks=seq(0,10,1)) +
+prior_df <- draws_df %>% 
+  spread_draws(priorpredk[timeLag]) %>% 
+  group_by(timeLag, priorpredk) %>%
+  summarize(prop=n()/4000)
+
+priorPredCheck <- ggplot(prior_df,aes(timeLag,priorpredk,size=prop)) +
+  geom_point(aes(timeLag,priorpredk,size=prop),shape=0) + guides(size="none") +
+  ylab("Success Rate") +
+  xlab("Time Lag") +
+  scale_x_continuous(minor_breaks=NULL,breaks=seq(0,10,1)) +
+  scale_y_continuous(minor_breaks=NULL,breaks=seq(0,18,1)) +
   theme(axis.text.x = element_text(angle=45, hjust=1)) +
-  geom_point(aes(x=data$k1, y=data$k2), colour="red", shape=4) +
   theme_classic()
 
-postCheck <- draws_df %>%
-  group_by(postpredk1, postpredk2) %>%
-  summarise(prop = n()/nsamples)
+post_df <- draws_df %>% 
+  spread_draws(postpredk[ID, timeLag]) %>% 
+  group_by(ID, timeLag, postpredk) %>%
+  summarize(prop=n()/4000)
 
-posteriorPredCheck <- ggplot(postCheck,aes(postpredk1,postpredk2,size=prop)) +
-  scale_size(range=c(0,5)) +
-  geom_point(shape=0) + guides(size="none") +
-  ylab("Success Rate 2") +
-  xlab("Success Rate 1") +
-  scale_y_continuous(minor_breaks=NULL,breaks=seq(0,10,1)) +
+postPredCheck <-  ggplot(post_df, aes(timeLag, postpredk)) +
+  geom_point(shape=0, size=7*post_df$prop) + guides(size="none") +
+  ylab("Success Rate") +
+  xlab("Time Lag") +
+  scale_x_continuous(minor_breaks=NULL,breaks=seq(0,10,1)) +
+  scale_y_continuous(minor_breaks=NULL,breaks=seq(0,18,1)) +
   theme(axis.text.x = element_text(angle=45, hjust=1)) +
-  geom_point(aes(x=data$k1, y=data$k2), colour="red", shape=4) +
-  theme_classic()
+  theme_classic() +
+  facet_wrap(.~ ID) +
+  geom_point(data=df,aes(timeLag, successes), size=3, alpha=0.5) +
+  geom_line(data=df,aes(timeLag, successes))
+  
 
-priorPredCheck + posteriorPredCheck
+priorPredCheck / postPredCheck
