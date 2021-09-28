@@ -34,7 +34,7 @@ df <- tibble(
 data_file <- tempfile(fileext = ".json")
 write_stan_json(data, data_file)
 
-file <- file.path(here("31_MemoryRetention", "31_MemoryRetention_2.stan"))
+file <- file.path(here("31_MemoryRetention", "31_MemoryRetention_3.stan"))
 mod <- cmdstan_model(file, cpp_options = list(stan_threads = TRUE), pedantic = TRUE)
 
 samples <- mod$sample(
