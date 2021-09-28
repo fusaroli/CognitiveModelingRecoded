@@ -1,3 +1,12 @@
+pacman::p_load(
+  tidyverse,
+  here,
+  cmdstanr,
+  posterior,
+  brms,
+  bayesplot
+)
+
 ### Geurts data:
 # Normal Controls:         
 num.errors <- c(15,10,61,11,60,44,63,70,57,11,67,21,89,12,63,11,96,10,37,19,44,
@@ -113,7 +122,7 @@ geurts_m <- brm(
 )
 geurts_m
 stancode(geurts_m)
-hypothesis(geurts_m, "b_conditioncontrol = 0", class="")
+hypothesis(geurts_m, "b_conditioncontrol > 0", class="")
 plot(hypothesis(geurts_m, "b_conditioncontrol = 0", class=""))
 
 posterior <- as_draws_df(geurts_m)

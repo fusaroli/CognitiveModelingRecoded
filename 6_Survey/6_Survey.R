@@ -42,7 +42,7 @@ samples$summary("n", "mean", "sd")
 # Extract posterior samples 
 draws_df <- as_draws_df(samples$draws()) 
 
-## Diagnositics
+## Diagnostics
 ggplot(draws_df, aes(.iteration, theta, color=as.factor(.chain))) +
   geom_line() +
   theme_classic()
