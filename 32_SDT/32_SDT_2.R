@@ -1,3 +1,9 @@
+pacman::p_load(
+  tidyverse,
+  here,
+  cmdstanr,
+  posterior
+)
 
 std_i <- matrix(
   c(3,1,1,3,4,0,0,4,4,4,0,0,4,1,0,3,4,3,0,1,4,4,0,0,4,1,0,3,4,3,0,1,4,
@@ -60,8 +66,9 @@ samples <- mod$sample(
   chains = 2,
   parallel_chains = 2,
   threads_per_chain = 2,
-  iter_warmup = 5000,
-  iter_sampling = 5000,
+  init=0,
+  iter_warmup = 1000,
+  iter_sampling = 1000,
   refresh = 500,
   max_treedepth = 20,
   adapt_delta = 0.99,
