@@ -47,8 +47,8 @@ draws_df <- as_draws_df(samples$draws())
 
 # Now let's plot the density for theta (prior and posterior)
 ggplot(draws_df) +
-  geom_density(aes(theta), color="blue", alpha=0.3) +
-  geom_density(aes(thetaprior), color="red", alpha=0.3) +
+  geom_density(aes(theta), fill="blue", alpha=0.3) +
+  geom_density(aes(thetaprior), fill="red", alpha=0.3) +
   xlab("Rate") +
   ylab("Posterior Density") +
   theme_classic()
@@ -70,7 +70,7 @@ ggplot(draws_df, aes(.iteration, theta, color=as.factor(.chain))) +
 
 # Extract diagnostics
 samples$cmdstan_diagnose() # summary
-diagnostics_df <- as_draws_df(fit$sampler_diagnostics())
+diagnostics_df <- as_draws_df(samples$sampler_diagnostics())
 print(diagnostics_df)
 
 

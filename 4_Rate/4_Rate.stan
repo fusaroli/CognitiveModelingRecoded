@@ -11,14 +11,12 @@ data {
 // accepts only theta, the rate, and a thetaprior to sample the prior
 parameters {
   real<lower=0, upper=1> theta;
-  real<lower=0, upper=1> thetaprior;
 }
 
 // The model to be estimated; prior and likelihood
 model {
   // THe prior for theta is a uniform distribution between 0 and 1
   theta ~ beta(1, 1);
-  thetaprior ~ beta(1, 1);
   
   // The model consists in a binomial distribution with a rate theta, 
   // and a number of trials n generating k successes
@@ -27,9 +25,11 @@ model {
 
 // We generate additional variables to facilitate predictive checks
 generated quantities {
+  real<lower=0, upper=1> thetaprior;
   int<lower=0> postpredk;
   int<lower=0> priorpredk;
-    
+  
+  thetaprior = beta_rng(1, 1);
   // Posterior Predictive
   postpredk = binomial_rng(n, theta);
   // Prior Predictive

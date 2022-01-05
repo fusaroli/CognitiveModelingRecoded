@@ -5,7 +5,6 @@ data {
 }
 parameters {
   real mu;
-  real muprior;
   vector<lower=0>[n] lambda;
   //  vector<lower=0>[n] lambdaprior;
 } 
@@ -22,10 +21,21 @@ transformed parameters {
 model {
   // Priors
   mu ~ normal(0, sqrt(1000));
-  muprior ~ normal(0, sqrt(1000));
   lambda ~ gamma(.001, .001);
-  // lambdaprior ~ gamma(.001, .001);
   
   // Data Come From Gaussians With Common Mean But Different Precisions
   x ~ normal(mu, sigma);
+}
+
+generated quantities{
+  real muprior;
+  real lambdaprior;
+  real preds_x;
+
+  muprior = normal_rng(0, sqrt(1000));
+  lambdaprior = gamma_rng(.001, .001);
+  
+  preds_x = normal_rng(muprior, inv_sqrt(lambdaprior));
+
+  
 }

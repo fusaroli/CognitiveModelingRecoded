@@ -11,7 +11,7 @@ data {
 
 parameters {
   real<lower=0.25, upper=1> theta; // 0.25 is chance level for the 4-choice questions
-  real<lower=0.25, upper=1> thetaprior; 
+
 }
 
 // The model to be estimated. We model the output
@@ -20,7 +20,6 @@ parameters {
 model {
   // Prior
   theta ~ beta(1,1);
-  thetaprior ~ beta(1,1);
   // Observed Data
   z_observed ~ binomial(n, theta); 
   // Unobserved Data
@@ -28,9 +27,11 @@ model {
 }
 
 generated quantities {
+  real<lower=0.25, upper=1> thetaprior; 
   real priorpred;
   real postpred;
     
+  thetaprior = beta_rng(1,1);
   // Prior Predictive
   priorpred = binomial_rng(n, thetaprior);
   // Posterior Predictive

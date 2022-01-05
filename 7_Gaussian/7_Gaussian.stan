@@ -21,24 +21,24 @@ data {
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
   real mu;
-  real muprior;
   real<lower=0,upper=10> sigma; 
-  real<lower=0,upper=10> sigmaprior; 
 }
 
 // The model to be estimated. 
 model {
   // Prior
   mu ~ normal(0, sqrt(1000));
-  muprior ~ normal(0, sqrt(1000));
   // Data Come From A Gaussian
   x ~ normal(mu, sigma);
 }
 
 generated quantities {
+  real muprior;
+  real<lower=0,upper=10> sigmaprior; 
   real priorpredk;
   real postpredk;
     
+  muprior = normal_rng(0, sqrt(1000));
   // Prior Predictive
   priorpredk = normal_rng(muprior, sigmaprior);
   // Posterior Predictive

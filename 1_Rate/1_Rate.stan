@@ -1,5 +1,5 @@
-// This Stan program defines a model
-// inferring a rate (theta) from a number of trials (n) and successes (k)
+
+// This Stan model infers a rate (theta) from a number of trials (n) and successes (k)
 
 // The input data is two integer numbers: n and k.
 data {
@@ -14,11 +14,10 @@ parameters {
 }
 
 // The model to be estimated; prior and likelihood
-
 model {
-  // THe prior for theta is a uniform distribution between 0 and 1
+  // The prior for theta is a uniform distribution between 0 and 1
   theta ~ beta(1, 1);
-  // theta ~ uniform(0, 1) ## equivalent to beta?
+  // theta ~ uniform(0, 1) ## equivalent to beta
   
   // The model consists in a binomial distribution with a rate theta, 
   // and a number of trials n generating k successes

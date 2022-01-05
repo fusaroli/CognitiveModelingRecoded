@@ -11,9 +11,7 @@ data {
 // accepts a common 'mu' and 7 'sigma's.
 parameters {
   real mu;
-  real muprior;
   vector<lower=0>[n] sigma;
-  real<lower=0> sigmaprior;
   
 }
 
@@ -23,11 +21,21 @@ parameters {
 model {
   // Priors
   mu ~ normal(0, 10);
-  muprior ~ normal(0, 10);
   sigma ~ normal(0, 10);
-  sigmaprior ~ normal(0, 10);
- // Data Come From Gaussians With Common Mean But Different Precisions
+  // Data Come From Gaussians With Common Mean But Different Precisions
   x ~ normal(mu, sigma);
+}
+
+generated quantities{
+  real muprior;
+  real<lower=0> sigmaprior;
+  real preds_x;
+  
+  muprior = normal_rng(0, 10);
+  sigmaprior = normal_rng(0, 10);
+  
+  preds_x = normal_rng(muprior, sigmaprior);
+
 }
 
 

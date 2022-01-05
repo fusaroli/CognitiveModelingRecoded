@@ -20,17 +20,13 @@ parameters {
   vector[2] mu;
   real<lower=0> sigma;
   real<lower=0,upper=n> tau;
-  vector[2] muprior;
-  real<lower=0> sigmaprior;
 } 
 
 model { 
   // Group Means
   mu ~ normal(0, 10);
-  muprior ~ normal(0, 10);
   // Standard deviation
   sigma ~ normal(0, 10);
-  sigmaprior ~ normal(0, 10);
     
   // Which Side is Time of Change Point?
   // Data Come From A Gaussian
@@ -40,5 +36,14 @@ model {
     else 
       c[i] ~ normal(mu[2], sigma);
   }
+}
+
+generated quantities{
+  vector[2] muprior;
+  real<lower=0> sigmaprior;
+  muprior[1] = normal_rng(0, 10);
+  muprior[2] = normal_rng(0, 10);
+  sigmaprior = normal_rng(0, 10);
+  
 }
 

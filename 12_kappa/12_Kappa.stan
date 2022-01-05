@@ -19,13 +19,10 @@ parameters {
   // Underlying Rates
   // Rate Objective Method Decides 'one'
   real<lower=0,upper=1> alpha;
-  real<lower=0,upper=1> alphaprior;
   // Rate Surrogate Method Decides 'one' When Objective Method Decides 'one'
   real<lower=0,upper=1> beta;
-  real<lower=0,upper=1> betaprior;
   // Rate Surrogate Method Decides 'zero' When Objective Method Decides 'zero'
   real<lower=0,upper=1> gamma;
-  real<lower=0,upper=1> gammaprior;
   
 } 
 
@@ -36,10 +33,6 @@ transformed parameters {
   real psi;
   real kappa;
   
-  simplex[n] piprior;
-  real xiprior;
-  real psiprior;
-  real kappaprior;
   
   // Probabilities For Each Count
   pi[1] = alpha * beta;
@@ -57,7 +50,32 @@ transformed parameters {
   // Chance-Corrected Agreement
   kappa = (xi - psi) / (1 - psi);
   
-    // Probabilities For Each Count
+  
+}
+
+model {
+  alpha ~ beta(1, 1);  // could be removed
+  beta ~ beta(1, 1);  // could be removed
+  gamma ~ beta(1, 1);  // could be removed
+  // Count Data     
+  y ~ multinomial(pi);
+  
+}
+
+generated quantities{
+  real<lower=0,upper=1> alphaprior;
+  real<lower=0,upper=1> betaprior;
+  real<lower=0,upper=1> gammaprior;
+  simplex[n] piprior;
+  real xiprior;
+  real psiprior;
+  real kappaprior;
+  
+  alphaprior = beta_rng(1, 1);  // could be removed
+  betaprior = beta_rng(1, 1);  // could be removed
+  gammaprior = beta_rng(1, 1);  // could be removed
+  
+  // Probabilities For Each Count
   piprior[1] = alphaprior * betaprior;
   piprior[2] = alphaprior * (1 - betaprior);
   piprior[3] = (1 - alphaprior) * (1 - gammaprior);
@@ -72,16 +90,4 @@ transformed parameters {
   
   // Chance-Corrected Agreement
   kappaprior = (xiprior - psiprior) / (1 - psiprior);
-}
-
-model {
-  alpha ~ beta(1, 1);  // could be removed
-  beta ~ beta(1, 1);  // could be removed
-  gamma ~ beta(1, 1);  // could be removed
-  alphaprior ~ beta(1, 1);  // could be removed
-  betaprior ~ beta(1, 1);  // could be removed
-  gammaprior ~ beta(1, 1);  // could be removed
-  // Count Data     
-  y ~ multinomial(pi);
-  
 }

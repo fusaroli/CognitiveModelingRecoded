@@ -13,14 +13,12 @@ data {
 // accepts only theta, the rate, and a thetaprior for sampling the prior
 parameters {
   real<lower=0, upper=1> theta;
-  real<lower=0, upper=1> thetaprior;
 }
 
 // The model to be estimated; prior and likelihood
 model {
   // The prior for theta is a uniform distribution between 0 and 1
   theta ~ beta(1, 1);
-  thetaprior ~ beta(1, 1);
   // theta ~ uniform(0, 1) ## equivalent to beta?
   
   // The model consists of 2 binomial distributions with a common rate theta
@@ -29,11 +27,13 @@ model {
 }
 
 generated quantities {
+  real<lower=0, upper=1> thetaprior;
   int<lower=0> priorpredk1;
   int<lower=0> priorpredk2;
   int<lower=0> postpredk1;
   int<lower=0> postpredk2;
     
+  thetaprior = beta_rng(1, 1);
   // Prior Predictive
   priorpredk1 = binomial_rng(n1, thetaprior);
   priorpredk2 = binomial_rng(n2, thetaprior);
