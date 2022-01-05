@@ -15,12 +15,9 @@ data {
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
   vector[2] mu;
-  real<lower=0> muprior;
   vector<lower=0>[2] sigma;
-  real<lower=0> sigmaprior;
   vector[2] thetap[nsubjs];
   real<lower=-1,upper=1> r;
-  real<lower=-1,upper=1> rprior;
 } 
 
 transformed parameters {
@@ -41,14 +38,20 @@ transformed parameters {
 model {
   // Priors
   mu ~ normal(0, 1);
-  muprior ~ normal(0, 1);
   sigma ~ normal(0, 3);
-  sigmaprior ~ normal(0, 3);
   r ~ normal(0, 0.5);
-  rprior ~ normal(0, 0.5);
   // Data
   thetap ~ multi_normal(mu, T);
   k ~ binomial(ntrials, theta[1]);
   x ~ normal(theta[2], sigmax);
 }
 
+generated quantities {
+  real<lower=0> muprior;
+  real<lower=0> sigmaprior;
+  real<lower=-1,upper=1> rprior;
+  muprior = normal_rng(0, 1);
+  sigmaprior = normal_rng(0, 3);
+  rprior = normal_rng(0, 0.5);
+  
+}

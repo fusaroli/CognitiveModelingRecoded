@@ -17,26 +17,17 @@ data {
 // The parameters accepted by the model. 
 parameters {
   real mualpha;                             // pop level intercept estimate
-  real mualphaprior;
   real<lower=0> sigmaalpha;                 // pop level variance of intercept estimate
-  real<lower=0> sigmaalphaprior;
   real mubeta;                              // pop level slope estimate                   
-  real mubetaprior;
   real<lower=0> sigmabeta;                  // pop level variance of slope estimate 
-  real<lower=0> sigmabetaprior;
-  
+   
   real alpha[nsubjs];                       // individual level intercept estimate
-  real alphaprior;
   real beta[nsubjs];                        // individual level slope estimate
-  real betaprior;
   
   real muphi;                               // pop level probability of contaminant (not paying attention)
-  real muphiprior;
   real<lower=0> sigmaphi;                   // pop level variance in probability of contaminant (not paying attention)
-  real<lower=0> sigmaphiprior;
   
   vector[nsubjs] probitphi;                 // individual level probability of contaminant
-  real probitphiprior;
   matrix<lower=0,upper=1>[nsubjs,28] pi;    //  success rate when contaminant process is on (not sure why it's by trial by participant)
   
 }
@@ -64,27 +55,18 @@ transformed parameters {
 // The model to be estimated. 
 model {
   mualpha ~ normal(0,1);           // population level mean intercept (in log odds)
-  mualphaprior ~ normal(0,1);
   sigmaalpha ~ normal(0,1);        // population level mean variance of the intercept (in log odds)
-  sigmaalphaprior ~ normal(0,1);
   
   mubeta ~ normal(0,.1);           // population level mean slope (in log odds)
-  mubetaprior ~ normal(0,.1);
   sigmabeta ~ normal(0,.1);        // population level mean variance of the slope (in log odds)
-  sigmabetaprior ~ normal(0,.1);
   
   alpha ~ normal(mualpha,sigmaalpha); // Individual level mean estimate for intercept (in log odds)
-  alphaprior ~ normal(mualphaprior,sigmaalphaprior);
   
   beta ~ normal(mubeta,sigmabeta); // Individual level mean estimate for slope (in log odds)
-  betaprior ~ normal(mubetaprior,sigmabetaprior);
   
   muphi ~ normal(0, 1); 
-  muphiprior ~ normal(0, 1); 
   sigmaphi ~ normal(0, 1); 
-  sigmaphiprior ~ normal(0, 1); 
   
-  probitphiprior ~ normal(muphiprior, sigmaphiprior);
   probitphi ~ normal(muphi, sigmaphi);
   
   
@@ -98,7 +80,28 @@ model {
 }
 
 generated quantities {
+  
+  real mualphaprior;
+  real<lower=0> sigmaalphaprior;
+  real mubetaprior;
+  real<lower=0> sigmabetaprior;
+  real alphaprior;
+  real betaprior;
+  real muphiprior;
+  real<lower=0> sigmaphiprior;
+  real probitphiprior;
   int<lower=0,upper=1> z[nsubjs,28];
+  
+  mualphaprior = normal_rng(0,1);
+  sigmaalphaprior = normal_rng(0,1);
+  mubetaprior = normal_rng(0,.1);
+  sigmabetaprior = normal_rng(0,.1);
+  alphaprior = normal_rng(mualphaprior,sigmaalphaprior);
+  betaprior = normal_rng(mubetaprior,sigmabetaprior);
+  muphiprior = normal_rng(0, 1); 
+  sigmaphiprior = normal_rng(0, 1); 
+  probitphiprior = normal_rng(muphiprior, sigmaphiprior);
+  
   for (i in 1:nsubjs) {
     for (j in 1:nstim[i]) {  
       vector[2] prob;

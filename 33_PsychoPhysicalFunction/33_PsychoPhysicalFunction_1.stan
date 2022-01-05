@@ -20,16 +20,10 @@ parameters {
   real<lower=0> sigmaalpha;
   real mubeta;
   real<lower=0> sigmabeta;
-  real mualphaprior;
-  real<lower=0> sigmaalphaprior;
-  real mubetaprior;
-  real<lower=0> sigmabetaprior;
+  
   
   real alpha[nsubjs];
   real beta[nsubjs];
-  real alphaprior;
-  real betaprior;
-  
   
   
 }
@@ -49,20 +43,16 @@ transformed parameters {
 // The model to be estimated. 
 model {
   mualpha ~ normal(0,1);           // population level mean intercept (in log odds)
-  mualphaprior ~ normal(0,1);
   sigmaalpha ~ normal(0,1);        // population level mean variance of the intercept (in log odds)
-  sigmaalphaprior ~ normal(0,1);
   
   mubeta ~ normal(0,.1);           // population level mean slope (in log odds)
-  mubetaprior ~ normal(0,.1);
   sigmabeta ~ normal(0,.1);        // population level mean variance of the slope (in log odds)
-  sigmabetaprior ~ normal(0,.1);
+  
   
   alpha ~ normal(mualpha,sigmaalpha); // Individual level mean estimate for intercept (in log odds)
-  alphaprior ~ normal(mualphaprior,sigmaalphaprior);
+ 
   
   beta ~ normal(mubeta,sigmabeta); // Individual level mean estimate for slope (in log odds)
-  betaprior ~ normal(mubetaprior,sigmabetaprior);
   
   for (i in 1:nsubjs){
     for (j in 1:nstim[i]){
@@ -73,6 +63,17 @@ model {
 }
 
 generated quantities{
+  real mualphaprior;
+  real<lower=0> sigmaalphaprior;
+  real mubetaprior;
+  real<lower=0> sigmabetaprior;real alphaprior;
+  real betaprior;
   
+  mualphaprior = normal_rng(0,1);
+  sigmaalphaprior = normal_rng(0,1);
+  mubetaprior = normal_rng(0,.1);
+  sigmabetaprior = normal_rng(0,.1); 
+  alphaprior = normal_rng(mualphaprior,sigmaalphaprior);
+  betaprior = normal_rng(mubetaprior,sigmabetaprior);
 }
 

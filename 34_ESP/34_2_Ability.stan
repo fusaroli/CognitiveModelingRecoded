@@ -12,11 +12,8 @@ data {
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
   vector<lower=0, upper=1>[2] mu;
-  real<lower=0, upper=1> muprior;
   vector<lower=0>[2] sigma;
-  real<lower=0> sigmaprior;
   real<lower=-1, upper=1> r;
-  real<lower=-1, upper=1> rprior;
 }
 
 transformed parameters {
@@ -34,13 +31,17 @@ transformed parameters {
 model {
   // Priors
   mu ~ beta(1,1);
-  muprior ~ beta(1,1);
   sigma ~ normal(0, .5);
-  sigmaprior ~ normal(0, .5);
   r ~ normal(0,.5);
-  rprior ~ normal(0,.5);
   // Data
   x ~ multi_normal(mu, T);
-  
 }
 
+generated quantities {
+  real<lower=0, upper=1> muprior;
+  real<lower=0> sigmaprior;
+  real<lower=-1, upper=1> rprior;
+  muprior = beta_rng(1,1);
+  sigmaprior = normal_rng(0, .5);
+  rprior = normal_rng(0,.5);
+}
