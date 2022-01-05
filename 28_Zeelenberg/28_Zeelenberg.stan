@@ -12,16 +12,12 @@ data {
 
 parameters {
   real<lower=0> mu;                    // pop-level average performance in no priming (for ind level phin)
-  real<lower=0> muprior;                    // pop-level average performance in no priming (for ind level phin)
   real<lower=0> sigma;        // pop-level variance in performance in no priming (for ind level phin)
-  real<lower=0> sigmaprior;        // pop-level variance in performance in no priming (for ind level phin)
   
   vector[ns] phin;                     // ind level performance rate (z-scores) in no priming
     
   real<lower=0> delta;                 // pop-level standardized difference
-  real<lower=0> deltaprior;            // pop-level standardized difference (prior)
   real<lower=0> sigmaalpha;   // pop-level variance for difference in performance btw conditions
-  real<lower=0> sigmaalphaprior;   // pop-level variance for difference in performance btw conditions
   
   vector[ns] alpha;                    // ind level difference in performance rate (both minus no)
 
@@ -30,12 +26,10 @@ parameters {
 transformed parameters {
 
   real<lower=0> mualpha;              // pop level non standardized mean difference, derived from alpha
-  real<lower=0> mualphaprior;              // pop level non standardized mean difference, derived from alpha
   vector<lower=0,upper=1>[ns] thetab; // ind-level theta for both priming
   vector<lower=0,upper=1>[ns] thetan; // ind-level theta for no priming
   vector[ns] phib;                    // ind-level performance rate (z-scores) in both priming
   
-  mualphaprior = deltaprior * sigmaalphaprior;       // transform standardized difference in non standardized difference
   mualpha = delta * sigmaalpha;       // transform standardized difference in non standardized difference
   phib = phin + alpha;                // performance (z-scores) in both is performance in no priming + alpha
   
@@ -49,14 +43,10 @@ transformed parameters {
 model{
   // Priors
   mu ~ normal(0, 1);            // pop-level average performance in no priming 
-  muprior ~ normal(0, 1);            // pop-level average performance in no priming 
   sigma ~ normal(0,1);
-  sigmaprior ~ normal(0,1);
   // Priming Effect
   delta ~ normal(0, 1);         // mean standardized difference
-  deltaprior ~ normal(0, 1);    // mean standardized difference prior
   sigmaalpha ~ normal(0,1);
-  sigmaalphaprior ~ normal(0,1);
   
   // Individual Parameters
   alpha ~ normal(mualpha, sigmaalpha);
@@ -66,3 +56,17 @@ model{
   sn ~ binomial(nn, thetan); //  no priming model
 }
 
+generated quantities{
+  real<lower=0> muprior;                    // pop-level average performance in no priming (for ind level phin)
+  real<lower=0> sigmaprior;        // pop-level variance in performance in no priming (for ind level phin)
+  real<lower=0> deltaprior;            // pop-level standardized difference (prior)
+  real<lower=0> sigmaalphaprior;   // pop-level variance for difference in performance btw conditions
+  real<lower=0> mualphaprior;              // pop level non standardized mean difference, derived from alpha
+  
+  mualphaprior = deltaprior * sigmaalphaprior;       // transform standardized difference in non standardized difference
+  muprior = normal_rng(0, 1);            // pop-level average performance in no priming 
+  sigmaprior = normal_rng(0,1);
+  deltaprior = normal_rng(0, 1);    // mean standardized difference prior
+  sigmaalphaprior = normal_rng(0,1);
+    
+}

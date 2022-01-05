@@ -15,14 +15,10 @@ data {
 parameters {
   real<lower=0, upper=1> theta2;
   real<lower=0, upper=theta2> theta1;
-  real<lower=0, upper=1> thetaprior2;
-  real<lower=0, upper=thetaprior2> thetaprior1;
 }
 
 transformed parameters {
-  real<lower=-1, upper=1> deltaprior;
   real<lower=-1, upper=1> delta;
-  deltaprior = thetaprior2 - thetaprior1;
   delta = theta2 - theta1;
   
 }
@@ -31,8 +27,6 @@ transformed parameters {
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  thetaprior1 ~ beta(1,1);
-  thetaprior2 ~ beta(1,1);
   theta1 ~ beta(1,1);
   theta2 ~ beta(1,1);
   
@@ -41,10 +35,17 @@ model {
 }
 
 generated quantities {
+  real<lower=0, upper=1> thetaprior2;
+  real<lower=0, upper=thetaprior2> thetaprior1;
+  real<lower=-1, upper=1> deltaprior;
   real PredictedOutcomePrior1;
   real PredictedOutcomePrior2;
   real PredictedOutcomePosterior1;
   real PredictedOutcomePosterior2;
+  
+  thetaprior1 = beta_rng(1,1);
+  thetaprior2 = beta_rng(1,1);
+  deltaprior = thetaprior2 - thetaprior1;
   
   // Prior Predictive
   PredictedOutcomePrior1 = binomial_rng(n1, thetaprior1);

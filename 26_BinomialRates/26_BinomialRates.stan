@@ -15,14 +15,12 @@ data {
 parameters {
   real<lower=0, upper=1> theta1;
   real<lower=0, upper=1> theta2;
-  real<lower=0, upper=1> thetaprior;
 }
 
 // The model to be estimated. We model the output
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  thetaprior ~ beta(1,1);
   theta1 ~ beta(1,1);
   theta2 ~ beta(1,1);
   
@@ -31,6 +29,7 @@ model {
 }
 
 generated quantities {
+  real<lower=0, upper=1> thetaprior;
   real<lower=-1, upper=1> deltaprior;
   real<lower=-1, upper=1> delta;
   real PredictedOutcomePrior1;
@@ -38,6 +37,7 @@ generated quantities {
   real PredictedOutcomePosterior1;
   real PredictedOutcomePosterior2;
   
+  thetaprior = beta_rng(1,1);
   deltaprior = beta_rng(1,1) - beta_rng(1,1);
   delta = theta1 - theta2;
   

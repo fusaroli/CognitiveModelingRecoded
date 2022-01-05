@@ -14,10 +14,9 @@ data {
 parameters {
   real mu1;
   real mu2;
-  real muprior;
   real<lower=0> sigma1;
   real<lower=0> sigma2;
-  real<lower=0> sigmaprior;
+  
 }
 
 // The model to be estimated. We model the output
@@ -26,14 +25,12 @@ parameters {
 model {
   mu1 ~ normal(0,1);
   mu2 ~ normal(0,1);
-  muprior ~ normal(0,1);
   
   // sigma ~ cauchy(0,1); // obviously crazy
   // sigmaprior ~ cauchy(0,1); // obviously crazy
   
   sigma1 ~ normal(0,1); // better
   sigma2 ~ normal(0,1); // better
-  sigmaprior ~ normal(0,1); // better
   
   // Data
   x ~ normal(mu1, sigma1);
@@ -41,10 +38,16 @@ model {
 }
 
 generated quantities{
+  real muprior;
+  real<lower=0> sigmaprior;
   real PredictedOutcomePrior;
   real PredictedOutcomePosterior;
   real alphaprior;
   real alpha;
+  
+  muprior = normal_rng(0,1);
+  sigmaprior = normal_rng(0,1); // better
+  
   alphaprior = normal_rng(0, 1)-normal_rng(0, 1);
   alpha = mu1 - mu2;
   PredictedOutcomePrior = normal_rng(muprior, sigmaprior)-normal_rng(muprior, sigmaprior);

@@ -12,7 +12,7 @@ data {
 // The parameters 
 parameters {
   vector<lower=0,upper=1>[2] psi;
-  vector<lower=0,upper=1>[2] psiprior; // n.b. this creates divergences
+  
 } 
 transformed parameters {
   vector[2] lp_parts[p];
@@ -25,17 +25,20 @@ transformed parameters {
 model {
   // Bona Fide Group has Unknown Success Rate Above Chance
   psi[1] ~ uniform(.5, 1);
-  psiprior[1] ~ uniform(.5, 1);  
   // Malingering Group has Unknown Success Rate Below Bona Fide
   psi[2] ~ uniform(0, psi[1]);
-  psiprior[2] ~ uniform(0, psiprior[1]);
   
   for (i in 1:p)
     target +=log_sum_exp(lp_parts[i]);    
 }
 
 generated quantities {
+  vector<lower=0,upper=1>[2] psiprior; // n.b. this creates divergences
   int<lower=0,upper=1> z[p];
+  
+  psiprior[1] = uniform_rng(.5, 1);  
+  psiprior[2] = uniform_rng(0, psiprior[1]);
+  
   
   for (i in 1:p) {
     vector[2] prob;

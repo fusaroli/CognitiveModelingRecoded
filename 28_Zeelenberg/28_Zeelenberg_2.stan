@@ -12,16 +12,12 @@ data {
 
 parameters {
   real<lower=0> mu;                    // pop-level average performance in no priming (for ind level phin)
-  real<lower=0> muprior;                    // pop-level average performance in no priming (for ind level phin)
   real<lower=0> sigma;        // pop-level variance in performance in no priming (for ind level phin)
-  real<lower=0> sigmaprior;        // pop-level variance in performance in no priming (for ind level phin)
   
   vector[ns] phin;                     // ind level performance rate (z-scores) in no priming
     
   real<lower=0> delta;                 // pop-level standardized difference
-  real<lower=0> deltaprior;            // pop-level standardized difference (prior)
   real<lower=0> sigmadelta;        // pop-level variance in performance in no priming (for ind level phin)
-  real<lower=0> sigmadeltaprior;        // pop-level variance in performance in no priming (for ind level phin)
   
   vector[ns] delta_ind;                    // ind level difference in performance rate (both minus no)
 
@@ -32,7 +28,6 @@ transformed parameters {
   vector<lower=0,upper=1>[ns] thetan; // ind-level theta for no priming
   vector[ns] phib;                    // ind-level performance rate (z-scores) in both priming
   real CohenD; 
-  real CohenDprior;                   // standardized effect size
   
   phib = phin + delta_ind;            // performance (z-scores) in both is performance in no priming + alpha
   
@@ -43,21 +38,16 @@ transformed parameters {
   }
   
   CohenD = delta / sigmadelta;
-  CohenDprior = deltaprior / sigmadeltaprior;
   
 }
 
 model{
   // Priors
   mu ~ normal(0, 1);            // pop-level average performance in no priming 
-  muprior ~ normal(0, 1);            // pop-level average performance in no priming 
   sigma ~ normal(0, 1);            // pop-level average performance in no priming 
-  sigmaprior ~ normal(0, 1);            // pop-level average performance in no priming 
   // Priming Effect
   delta ~ normal(0, .2);         // mean standardized difference
-  deltaprior ~ normal(0, .2);    // mean standardized difference prior
   sigmadelta ~ normal(0, .2);            // pop-level average performance in no priming 
-  sigmadeltaprior ~ normal(0, .2);            // pop-level average performance in no priming 
   
   // Individual Parameters
   delta_ind ~ normal(delta, sigmadelta);
@@ -67,3 +57,16 @@ model{
   sn ~ binomial(nn, thetan); //  no priming model
 }
 
+generated quantities {
+real<lower=0> muprior;                    // pop-level average performance in no priming (for ind level phin)
+  real<lower=0> sigmaprior;        // pop-level variance in performance in no priming (for ind level phin)
+  real<lower=0> deltaprior;            // pop-level standardized difference (prior)
+  real<lower=0> sigmadeltaprior;        // pop-level variance in performance in no priming (for ind level phin)
+  real CohenDprior;                   // standardized effect size
+  CohenDprior = deltaprior / sigmadeltaprior;
+  muprior = normal_rng(0, 1);            // pop-level average performance in no priming 
+  sigmaprior = normal_rng(0, 1);            // pop-level average performance in no priming 
+  deltaprior = normal_rng(0, .2);    // mean standardized difference prior
+  sigmadeltaprior = normal_rng(0, .2);            // pop-level average performance in no priming 
+    
+}

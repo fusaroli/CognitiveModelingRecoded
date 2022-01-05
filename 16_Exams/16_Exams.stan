@@ -17,7 +17,6 @@ transformed data {
 parameters {
   // Second Group Has Some Unknown Greater Rate Of Success
   real<lower=.5,upper=1> phi; 
-  real<lower=.5,upper=1> phiprior;
 }
 
 transformed parameters {
@@ -30,7 +29,6 @@ transformed parameters {
 }
 
 model {
- phiprior ~ uniform(.5,1);
  
   for (i in 1:p)
     target += log_sum_exp(lp_parts[i]);  
@@ -44,6 +42,12 @@ generated quantities {
     z[i] = bernoulli_rng(prob[1]);
   }
 }
+
+generated quantities {
+  real<lower=.5,upper=1> phiprior;
+  phiprior = uniform_rng(.5,1);
+}
+
 
 // // generated with brms 2.16.1
 // functions {

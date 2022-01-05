@@ -17,12 +17,8 @@ transformed data {
 parameters {
   // Second Group Has Some Unknown Greater Rate Of Success
   vector<lower=0,upper=1>[p] phi; 
-  real<lower=.5,upper=1> phiprior;
   real<lower=.5,upper=1> mu;  // Second Group Mean
-  real<lower=.5,upper=1> muprior;  // Second Group Mean
   real<lower=0> sigma;
-  real<lower=0> sigmaprior;
-  real<lower=0,upper=1> predphi;
 }
 
 transformed parameters {
@@ -37,12 +33,8 @@ transformed parameters {
 }
 
 model {
- phiprior ~ uniform(.5,1);
  // Second Group Precision
  sigma ~ normal(0, 10); // new
- sigmaprior ~ normal(0, 10); // new
- // Posterior Predictive For Second Group
- predphi ~ normal(mu, sigma)T[0,1]; // new
  
  // Second Group Drawn From A Censored Gaussian Distribution
  for (i in 1:p)                       // new
@@ -53,8 +45,18 @@ model {
 }
 
 generated quantities {
+  real<lower=.5,upper=1> phiprior;
+  real<lower=.5,upper=1> muprior;  // Second Group Mean
+  real<lower=0> sigmaprior;
+  real<lower=0,upper=1> predphi;
   int<lower = 0,upper = 1> z[p];
   vector<lower=0,upper=1>[p] theta; // new
+  
+  phiprior = uniform_rng(.5,1);
+  sigmaprior = normal_rng(0, 10); // new
+  // Posterior Predictive For Second Group
+  predphi = normal_rng(mu, sigma); // new
+ 
   
   for (i in 1:p) {
     vector[2] prob;
