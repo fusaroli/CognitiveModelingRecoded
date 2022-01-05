@@ -18,12 +18,9 @@ data {
 parameters {
   
   real delta;
-  real deltaprior;
   
   real mu;
-  real muprior;
   real<lower=0> sigma;
-  real<lower=0> sigmaprior;
   
   vector[nsc] phi_c;                     
   vector[nsa] phi_a;
@@ -32,12 +29,10 @@ parameters {
 
 transformed parameters{
   real alpha;
-  real alphaprior;
   
   vector<lower=0,upper=1>[nsc] theta_c; // 
   vector<lower=0,upper=1>[nsa] theta_a; // 
   
-  alphaprior = deltaprior * sigmaprior;       // transform standardized difference in non standardized difference
   alpha = delta * sigma;       // transform standardized difference in non standardized difference
   
   // Probit transformation
@@ -51,12 +46,9 @@ transformed parameters{
 // The model to be estimated. 
 model {
   mu ~ normal(0,1);
-  muprior ~ normal(0,1);
   sigma ~ normal(0,1);
-  sigmaprior ~ normal(0,1);
   
   delta ~ normal(0,1)T[0,];
-  deltaprior ~ normal(0,1)T[0,];
   
   phi_c ~ normal(mu + alpha/2, sigma);
   phi_a ~ normal(mu - alpha/2, sigma);
@@ -66,3 +58,15 @@ model {
   ka ~ binomial(na, theta_a); //  no priming model
 }
 
+generated quantities {
+  real deltaprior;
+  real muprior;
+  real<lower=0> sigmaprior;
+  real alphaprior;
+  alphaprior = deltaprior * sigmaprior;       // transform standardized difference in non standardized difference
+  
+  muprior = normal_rng(0,1);
+  sigmaprior = normal_rng(0,1);
+  deltaprior = normal_rng(0,1)T[0,];
+  
+}
