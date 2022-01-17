@@ -20,11 +20,11 @@ transformed parameters {
 }
 model {
   // Priors
-  mu ~ normal(0, sqrt(1000));
-  lambda ~ gamma(.001, .001);
+  target += normal_lpdf(mu | 0, sqrt(1000));
+  target += gamma_lpdf(lambda | .001, .001);
   
   // Data Come From Gaussians With Common Mean But Different Precisions
-  x ~ normal(mu, sigma);
+  target += normal_lpdf(x | mu, sigma);
 }
 
 generated quantities{

@@ -54,11 +54,11 @@ transformed parameters {
 }
 
 model {
-  alpha ~ beta(1, 1);  // could be removed
-  beta ~ beta(1, 1);  // could be removed
-  gamma ~ beta(1, 1);  // could be removed
+  target += beta_lpdf(alpha | 1, 1);  // could be removed
+  target += beta_lpdf(beta | 1, 1);  // could be removed
+  target += beta_lpdf(gamma | 1, 1);  // could be removed
   // Count Data     
-  y ~ multinomial(pi);
+  target += multinomial_lpmf(y | pi);
   
 }
 

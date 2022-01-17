@@ -28,12 +28,12 @@ transformed parameters {
 
 model {
   // Priors
-  mu ~ normal(0, 10);
-  sigma ~ normal(0, 10);
-  r ~ normal(0, 0.5);
+  target += normal_lpdf(mu | 0, 10);
+  target += normal_lpdf(sigma | 0, 10);
+  target += normal_lpdf(r | 0, 0.5);
   
   // Data
-  x ~ multi_normal(mu, T);
+  target += multi_normal_lpdf(x | mu, T);
 }
 
 generated quantities {

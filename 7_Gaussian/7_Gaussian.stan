@@ -27,9 +27,9 @@ parameters {
 // The model to be estimated. 
 model {
   // Prior
-  mu ~ normal(0, sqrt(1000));
+  target += normal_lpdf(mu | 0, sqrt(1000));
   // Data Come From A Gaussian
-  x ~ normal(mu, sigma);
+  target += normal_lpdf(x | mu, sigma);
 }
 
 generated quantities {

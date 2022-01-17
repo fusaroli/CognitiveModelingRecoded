@@ -13,11 +13,11 @@ parameters {
 
 model {
   // Data Come From Gaussians With Different Means But Common Standard Deviation
-  mu ~ normal(100, 15);
-  sigma ~ normal(0, 15);
+  target += normal_lpdf(mu | 100, 15);
+  target += normal_lpdf(sigma | 0, 15);
   for (i in 1:n)
     for (j in 1:m)  
-      x[i,j] ~ normal(mu[i], sigma);
+      target += normal_lpdf(x[i,j] | mu[i], sigma);
 }
 
 generated quantities {

@@ -20,10 +20,10 @@ parameters {
 // and standard deviation 'sigma'.
 model {
   // Priors
-  mu ~ normal(0, 10);
-  sigma ~ normal(0, 10);
+  target += normal_lpdf(mu | 0, 10);
+  target += normal_lpdf(sigma | 0, 10);
   // Data Come From Gaussians With Common Mean But Different Precisions
-  x ~ normal(mu, sigma);
+  target += normal_lpdf(x | mu, sigma);
 }
 
 generated quantities{
