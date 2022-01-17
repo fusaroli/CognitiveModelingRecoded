@@ -16,12 +16,13 @@ parameters {
 // The model to be estimated; prior and likelihood
 model {
   // The prior for theta is a uniform distribution between 0 and 1
-  theta ~ beta(1, 1);
-  // theta ~ uniform(0, 1) ## equivalent to beta
+  target += beta_lpdf(theta | 1, 1);
+  // theta ~ beta(1, 1) ## equivalent to beta
   
   // The model consists in a binomial distribution with a rate theta, 
   // and a number of trials n generating k successes
-  k ~ binomial(n, theta);
+  target += binomial_lpmf(k | n, theta);
+  // k ~ binomial(n, theta);
   
 }
 

@@ -25,12 +25,12 @@ transformed parameters {
 // The model to be estimated; prior and likelihood
 model {
   // THe prior for both thetas is a uniform distribution between 0 and 1
-  theta1 ~ beta(1, 1);
-  theta2 ~ beta(1, 1);
+  target += beta_lpdf(theta1 | 1, 1);
+  target += beta_lpdf(theta2 | 1, 1);
   
   // The model consists of 2 binomial distributions
-  k1 ~ binomial(n1, theta1);
-  k2 ~ binomial(n2, theta2);
+  target += binomial_lpmf(k1 | n1, theta1);
+  target += binomial_lpmf(k2 | n2, theta2);
 }
 
 // generated with brms 2.16.1
