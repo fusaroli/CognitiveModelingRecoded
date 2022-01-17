@@ -19,9 +19,9 @@ parameters {
 // and standard deviation 'sigma'.
 model {
   // Prior
-  theta ~ beta(1,1);
+  target += beta_lpdf(theta | 1,1);
   // Observed Data
-  z_observed ~ binomial(n, theta); 
+  target += binomial_lpmf(z_observed | n, theta); 
   // Unobserved Data
   target += nfails * log(binomial_cdf(25 | n, theta) - binomial_cdf(14 | n, theta));
 }

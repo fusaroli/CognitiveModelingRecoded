@@ -24,17 +24,17 @@ parameters {
 
 model { 
   // Group Means
-  mu ~ normal(0, 10);
+  target += normal_lpdf(mu | 0, 10);
   // Standard deviation
-  sigma ~ normal(0, 10);
+  target += normal_lpdf(sigma | 0, 10);
     
   // Which Side is Time of Change Point?
   // Data Come From A Gaussian
   for (i in 1:n) {
     if ((t[i] - tau) < 0.0)
-      c[i] ~ normal(mu[1], sigma);
+      target += normal_lpdf(c[i] | mu[1], sigma);
     else 
-      c[i] ~ normal(mu[2], sigma);
+      target += normal_lpdf(c[i] | mu[2], sigma);
   }
 }
 

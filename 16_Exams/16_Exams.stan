@@ -33,19 +33,16 @@ model {
   for (i in 1:p)
     target += log_sum_exp(lp_parts[i]);  
 }
+
 generated quantities {
   int<lower = 0,upper = 1> z[p];
-  
+  real<lower=.5,upper=1> phiprior;
+  phiprior = uniform_rng(.5,1);
   for (i in 1:p) {
     vector[2] prob;
     prob = softmax(lp_parts[i]);
     z[i] = bernoulli_rng(prob[1]);
   }
-}
-
-generated quantities {
-  real<lower=.5,upper=1> phiprior;
-  phiprior = uniform_rng(.5,1);
 }
 
 

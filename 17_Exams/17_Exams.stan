@@ -34,11 +34,11 @@ transformed parameters {
 
 model {
  // Second Group Precision
- sigma ~ normal(0, 10); // new
+ target += normal_lpdf(sigma | 0, 10); // new
  
  // Second Group Drawn From A Censored Gaussian Distribution
  for (i in 1:p)                       // new
-    phi[i] ~ normal(mu, sigma)T[0,1]; // new
+    target += normal_lpdf(phi[i] | mu, sigma); // newT[0,1]
  
  for (i in 1:p)
     target += log_sum_exp(lp_parts[i]);  
