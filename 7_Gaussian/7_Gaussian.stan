@@ -28,6 +28,7 @@ parameters {
 model {
   // Prior
   target += normal_lpdf(mu | 0, sqrt(1000));
+  target += uniform_lpdf(sigma | 0, 10);
   // Data Come From A Gaussian
   target += normal_lpdf(x | mu, sigma);
 }
@@ -38,6 +39,7 @@ generated quantities {
   real priorpredk;
   real postpredk;
     
+  sigmaprior = uniform_rng(0, 10);
   muprior = normal_rng(0, sqrt(1000));
   // Prior Predictive
   priorpredk = normal_rng(muprior, sigmaprior);

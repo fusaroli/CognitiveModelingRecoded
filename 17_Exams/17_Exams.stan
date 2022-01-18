@@ -33,12 +33,13 @@ transformed parameters {
 }
 
 model {
+ target += normal_lpdf(mu | 0.75, .2) - normal_lccdf(0.5 | 0, 1); // new
  // Second Group Precision
- target += normal_lpdf(sigma | 0, 10); // new
+ target += normal_lpdf(sigma | 0, 1) - normal_lccdf(0.0 | 0, 1); // new
  
  // Second Group Drawn From A Censored Gaussian Distribution
- for (i in 1:p)                       // new
-    target += normal_lpdf(phi[i] | mu, sigma); // newT[0,1]
+ for (i in 1:p)
+    target += normal_lpdf(phi[i] | mu, sigma) - log_diff_exp(normal_lcdf(1 | mu, sigma), normal_lcdf(0.5 | mu, sigma));
  
  for (i in 1:p)
     target += log_sum_exp(lp_parts[i]);  
@@ -52,6 +53,7 @@ generated quantities {
   int<lower = 0,upper = 1> z[p];
   vector<lower=0,upper=1>[p] theta; // new
   
+  muprior = uniform_rng(.5,1);
   phiprior = uniform_rng(.5,1);
   sigmaprior = normal_rng(0, 10); // new
   // Posterior Predictive For Second Group

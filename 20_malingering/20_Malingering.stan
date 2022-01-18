@@ -24,9 +24,9 @@ transformed parameters {
 // The model to be estimated. 
 model {
   // Bona Fide Group has Unknown Success Rate Above Chance
-  psi[1] ~ uniform(.5, 1);
+  target += uniform_lpdf(psi[1] | 0.5, 1);
   // Malingering Group has Unknown Success Rate Below Bona Fide
-  psi[2] ~ uniform(0, psi[1]);
+  target += uniform_lpdf(psi[2] | 0, psi[1]);
   
   for (i in 1:p)
     target +=log_sum_exp(lp_parts[i]);    

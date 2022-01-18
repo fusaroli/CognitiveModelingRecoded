@@ -19,14 +19,14 @@ transformed parameters {
 }
 model {
   // Priors For People and Questions
-  p ~ beta(1, 1);
-  q ~ beta(1, 1);
+  target += beta_lpdf(p | 1, 1); // flat prior
+  target += beta_lpdf(q | 1, 1); // flat prior
     
   // Correctness Of Each Answer Is Bernoulli Trial
   for (i in 1:np)
     for (j in 1:nq)
       if (k_na[i,j] == 0)     // If k[i,j] is not missing
-        k[i,j] ~ bernoulli(theta[i,j]);
+        target += bernoulli_lpmf(k[i, j] | theta[i,j]);
 }
 generated quantities {
   int na_array[n_na];

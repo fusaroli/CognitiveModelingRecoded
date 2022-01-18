@@ -28,13 +28,13 @@ transformed parameters {
 }
 model {
   // Priors For People and Questions
-  p ~ beta(1, 1); // flat prior
-  q ~ beta(1, 1); // flat prior
+  target += beta_lpdf(p | 1, 1); // flat prior
+  target += beta_lpdf(q | 1, 1); // flat prior
     
   // Correctness Of Each Answer Is Bernoulli Trial
   for (i in 1:np)
     for (j in 1:nq)
-      k[i, j] ~ bernoulli(theta[i,j]);
+      target += bernoulli_lpmf(k[i, j] | theta[i,j]);
 }
 
 // // generated with brms 2.16.1

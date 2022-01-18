@@ -44,15 +44,15 @@ transformed parameters {
 }
 model {
   // Priors
-  mubon ~ beta(1, 1);  // can be removed
-  mudiff ~ normal(0, 1 / sqrt(.5))T[0,];  // Constrained to be Positive
+  target += beta_lpdf(mubon | 1, 1);  // can be removed
+  target += normal_lpdf(mudiff | 0, 1 / sqrt(.5))- normal_lccdf(0.0 | 0, 1);
   // Relatively Uninformative Prior on Base Rate
-  phi ~ beta(5, 5);
+  target += beta_lpdf(phi | 5, 5);
     
   for (i in 1:p)  
     target += log_sum_exp(lp_parts[i]);    
     
-  k ~ binomial(n, theta);
+  target += binomial_lpmf(k | n, theta);
 }
 generated quantities {
   int<lower=0,upper=1> z[p];

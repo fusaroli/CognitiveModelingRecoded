@@ -18,7 +18,7 @@ n <- 45         # number of questions
 
 data <- list(p=p, k=k, n=n)  # To be passed on to Stan
 
-file <- file.path(here("20_malingering", "20_Malingering.stan"))
+file <- file.path(here("20_Malingering", "20_Malingering.stan"))
 mod <- cmdstan_model(file, cpp_options = list(stan_threads = TRUE), pedantic = TRUE)
 
 ## N.B. divergences relate to the priors

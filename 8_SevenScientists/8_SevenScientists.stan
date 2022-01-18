@@ -1,6 +1,14 @@
 //
 // This Stan model does something
 
+functions {
+  real normal_lb_rng(real mu, real sigma, real lb) {
+    real p = normal_cdf(lb | mu, sigma);  // cdf for bounds
+    real u = uniform_rng(p, 1);
+    return (sigma * inv_Phi(u)) + mu;  // inverse cdf for value
+  }
+}
+ 
 // The input data is a vector 'x' of length 'n'.
 data {
   int<lower=1> n;
@@ -21,7 +29,7 @@ parameters {
 model {
   // Priors
   target += normal_lpdf(mu | 0, 10);
-  target += normal_lpdf(sigma | 0, 10);
+  target += normal_lpdf(sigma | 0, 10)- normal_lccdf(0.0 | 0, 10);
   // Data Come From Gaussians With Common Mean But Different Precisions
   target += normal_lpdf(x | mu, sigma);
 }
@@ -32,7 +40,7 @@ generated quantities{
   real preds_x;
   
   muprior = normal_rng(0, 10);
-  sigmaprior = normal_rng(0, 10);
+  sigmaprior = normal_lb_rng(0, 20, 0);
   
   preds_x = normal_rng(muprior, sigmaprior);
 

@@ -19,13 +19,13 @@ parameters {
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  mu ~ normal(0,1);
+  target += normal_lpdf(mu | 0, 1);
   
   // sigma ~ cauchy(0,1); // obviously crazy
   // sigmaprior ~ cauchy(0,1); // obviously crazy
   
-  sigma ~ normal(0,1); // better
-  x ~ normal(mu, sigma);
+  target += normal_lpdf(sigma | 0, 1) - normal_lccdf(0.0 | 0, 1); // better
+  target += normal_lpdf(x | mu, sigma);
 }
 
 generated quantities{
