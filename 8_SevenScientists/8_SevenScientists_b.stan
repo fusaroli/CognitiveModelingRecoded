@@ -8,6 +8,7 @@ parameters {
   vector<lower=0>[n] lambda;
   //  vector<lower=0>[n] lambdaprior;
 } 
+
 transformed parameters {
   vector<lower=0>[n] sigma;
   // vector<lower=0>[n] sigmaprior;
