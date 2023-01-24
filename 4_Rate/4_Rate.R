@@ -6,8 +6,7 @@ pacman::p_load(tidyverse,
                cmdstanr,
                bayesplot,
                posterior,
-               rstan,
-               bayesplot)
+               rstan)
 
 ## Create the data
 data <- list(
